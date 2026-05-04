@@ -3,6 +3,7 @@ extends CanvasLayer
 var _root: Control
 var _title: Label
 var _subtitle: Label
+var _revive_btn: Button
 
 
 func _ready() -> void:
@@ -32,6 +33,12 @@ func _on_died() -> void:
 	_root.visible = true
 	get_tree().paused = true
 
+	# Configure revive button — só aparece se ainda não foi usada nesta run
+	if _revive_btn != null:
+		_revive_btn.visible = not GameManager.ReviveUsedThisRun
+		_revive_btn.disabled = false
+		_revive_btn.text = "▶  Reviver assistindo anúncio"
+
 
 func _on_restart() -> void:
 	get_tree().paused = false
@@ -43,6 +50,32 @@ func _on_menu() -> void:
 	get_tree().paused = false
 	GameManager.reset_run_state()
 	get_tree().change_scene_to_file("res://Scenes/CharacterSelect.tscn")
+
+
+func _on_revive_pressed() -> void:
+	_revive_btn.disabled = true
+	_revive_btn.text = "Carregando anúncio..."
+	AdsManager.request_rewarded_ad(_on_revive_success, _on_revive_fail)
+
+
+func _on_revive_success() -> void:
+	GameManager.ReviveUsedThisRun = true
+	var player = GameManager.Player
+	if player != null and is_instance_valid(player):
+		var revive_hp: int = 15
+		if player.stats != null:
+			revive_hp = maxi(1, player.stats.MaxHp / 2)
+		player.revive(revive_hp)
+	GameManager.clear_all_enemies()
+	_root.visible = false
+	get_tree().paused = false
+
+
+func _on_revive_fail() -> void:
+	if _revive_btn == null or not is_instance_valid(_revive_btn):
+		return
+	_revive_btn.disabled = false
+	_revive_btn.text = "▶  Reviver assistindo anúncio"
 
 
 func _build_ui() -> void:
@@ -65,9 +98,9 @@ func _build_ui() -> void:
 	panel.anchor_right = 0.5
 	panel.anchor_bottom = 0.5
 	panel.offset_left = -240
-	panel.offset_top = -150
+	panel.offset_top = -180
 	panel.offset_right = 240
-	panel.offset_bottom = 150
+	panel.offset_bottom = 180
 	_root.add_child(panel)
 
 	var margin := MarginContainer.new()
@@ -78,7 +111,7 @@ func _build_ui() -> void:
 	panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
+	vbox.add_theme_constant_override("separation", 14)
 	margin.add_child(vbox)
 
 	_title = Label.new()
@@ -94,12 +127,22 @@ func _build_ui() -> void:
 	_subtitle.add_theme_font_size_override("font_size", 16)
 	vbox.add_child(_subtitle)
 
-	var btn := Button.new()
-	btn.text = "Reiniciar (R)"
-	btn.custom_minimum_size = Vector2(380, 52)
-	btn.add_theme_font_size_override("font_size", 18)
-	btn.pressed.connect(_on_restart)
-	vbox.add_child(btn)
+	# Revive (rewarded ad) — destaque dourado
+	_revive_btn = Button.new()
+	_revive_btn.text = "▶  Reviver assistindo anúncio"
+	_revive_btn.custom_minimum_size = Vector2(380, 52)
+	_revive_btn.add_theme_font_size_override("font_size", 16)
+	_revive_btn.add_theme_color_override("font_color", Color(1, 0.85, 0.4))
+	_revive_btn.add_theme_color_override("font_hover_color", Color(1, 0.95, 0.55))
+	_revive_btn.pressed.connect(_on_revive_pressed)
+	vbox.add_child(_revive_btn)
+
+	var restart_btn := Button.new()
+	restart_btn.text = "Reiniciar (R)"
+	restart_btn.custom_minimum_size = Vector2(380, 48)
+	restart_btn.add_theme_font_size_override("font_size", 18)
+	restart_btn.pressed.connect(_on_restart)
+	vbox.add_child(restart_btn)
 
 	var menu_btn := Button.new()
 	menu_btn.text = "Trocar personagem"

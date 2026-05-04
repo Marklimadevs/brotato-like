@@ -21,6 +21,7 @@ var Level: int = 1
 var XpForNextLevel: int = 5
 var Materials: int = 0
 var PendingLevelUps: int = 0
+var ReviveUsedThisRun: bool = false
 
 
 func _enter_tree() -> void:
@@ -107,5 +108,14 @@ func reset_run_state() -> void:
 	XpForNextLevel = 5
 	Materials = 0
 	PendingLevelUps = 0
+	ReviveUsedThisRun = false
 	Enemies.clear()
 	Player = null
+
+
+func clear_all_enemies() -> void:
+	var snapshot: Array = Enemies.duplicate()
+	for e in snapshot:
+		if is_instance_valid(e):
+			e.queue_free()
+	Enemies.clear()

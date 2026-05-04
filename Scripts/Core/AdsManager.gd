@@ -1,56 +1,125 @@
 extends Node
 
 # AdsManager — autoload singleton.
-# Detecta o SDK do CrazyGames quando o jogo roda dentro do portal deles.
-# Fora da web ou em desenvolvimento local, fica em modo stub (chamadas
-# de ad sempre fazem fallback para o callback de "skip", sem travar nada).
+# Ponte com o SDK do CrazyGames v3 via JavaScriptBridge.
+# Em editor (F5) ou fora da web: simula sucesso após 0.6s pra testar a UX
+# sem precisar uplodar.
 #
-# Uso futuro (quando for implementar rewarded ads):
+# Uso:
 #   AdsManager.request_rewarded_ad(
-#       func(): print("ad concluído, conceder reward"),
-#       func(): print("ad pulado/falhou, sem reward"),
+#       func(): print("ad assistido — dar reward"),
+#       func(): print("ad pulado/sem fill — sem reward"),
 #   )
 
 var _sdk_available: bool = false
+var _ad_in_progress: bool = false
+var _on_success: Callable = Callable()
+var _on_fail: Callable = Callable()
+
+# JavaScriptObject refs precisam ficar vivas para o JS chamar de volta
+var _success_cb = null
+var _fail_cb = null
 
 
 func _ready() -> void:
 	if not OS.has_feature("web"):
-		print("AdsManager: rodando fora da web — modo stub.")
+		print("AdsManager: rodando fora da web — modo dev (ads simulados).")
 		return
 	if not Engine.has_singleton("JavaScriptBridge"):
-		print("AdsManager: JavaScriptBridge não disponível.")
+		print("AdsManager: JavaScriptBridge indisponível.")
 		return
-	# Checa se o SDK do CrazyGames foi carregado pelo head_include
+
 	var result = JavaScriptBridge.eval("typeof window.CrazyGames !== 'undefined'", true)
 	_sdk_available = (result == true)
+
 	if _sdk_available:
 		print("AdsManager: CrazyGames SDK detectado ✓")
+		_setup_callbacks()
 	else:
-		print("AdsManager: SDK do CrazyGames não disponível (provavelmente rodando fora do portal).")
+		print("AdsManager: SDK do CrazyGames não disponível — usando modo simulado.")
 
 
-func is_available() -> bool:
+func _setup_callbacks() -> void:
+	_success_cb = JavaScriptBridge.create_callback(_on_ad_success_internal)
+	_fail_cb = JavaScriptBridge.create_callback(_on_ad_fail_internal)
+	var window = JavaScriptBridge.get_interface("window")
+	if window != null:
+		window.godotAdSuccess = _success_cb
+		window.godotAdFail = _fail_cb
+
+
+func is_real_sdk_available() -> bool:
 	return _sdk_available
 
 
-# Stubs — quando for implementar ads, plugar JavaScriptBridge aqui.
-# Por enquanto sempre chama o callback de "skip" (sem reward).
+func is_ad_in_progress() -> bool:
+	return _ad_in_progress
 
-func request_rewarded_ad(on_success: Callable, on_skip: Callable) -> void:
-	if not _sdk_available:
-		on_skip.call()
+
+# Pede um rewarded ad. Sempre retorna por callback (assíncrono).
+# Em editor / sem SDK, simula sucesso após delay.
+func request_rewarded_ad(on_success: Callable, on_fail: Callable) -> void:
+	if _ad_in_progress:
+		on_fail.call()
 		return
-	# TODO: integrar com CrazyGames SDK v3 — algo como:
-	# JavaScriptBridge.eval("""
-	#   window.CrazyGames.SDK.ad.requestAd('rewarded')
-	#     .then(() => godotCallback('success'))
-	#     .catch(() => godotCallback('skip'));
-	# """, true)
-	on_skip.call()
+	_ad_in_progress = true
+	_on_success = on_success
+	_on_fail = on_fail
 
-
-func request_midgame_ad() -> void:
 	if not _sdk_available:
+		# Editor / sem SDK — simula sucesso após meio segundo
+		print("AdsManager: simulando rewarded ad bem-sucedido")
+		await get_tree().create_timer(0.6).timeout
+		_on_ad_success_internal([])
 		return
-	# TODO: window.CrazyGames.SDK.ad.requestAd('midgame')
+
+	# Produção — chama o SDK do CrazyGames
+	JavaScriptBridge.eval("""
+		try {
+			window.CrazyGames.SDK.ad.requestAd('rewarded')
+				.then(function() { window.godotAdSuccess(); })
+				.catch(function() { window.godotAdFail(); });
+		} catch(e) {
+			window.godotAdFail();
+		}
+	""", true)
+
+
+# Notificações de gameplay state pro CrazyGames decidir quando mostrar ads
+# institucionais. Chamadas seguras (no-op em editor).
+func notify_gameplay_start() -> void:
+	if not _sdk_available: return
+	JavaScriptBridge.eval("try { window.CrazyGames.SDK.game.gameplayStart(); } catch(e) {}", true)
+
+
+func notify_gameplay_stop() -> void:
+	if not _sdk_available: return
+	JavaScriptBridge.eval("try { window.CrazyGames.SDK.game.gameplayStop(); } catch(e) {}", true)
+
+
+func notify_loading_start() -> void:
+	if not _sdk_available: return
+	JavaScriptBridge.eval("try { window.CrazyGames.SDK.game.loadingStart(); } catch(e) {}", true)
+
+
+func notify_loading_stop() -> void:
+	if not _sdk_available: return
+	JavaScriptBridge.eval("try { window.CrazyGames.SDK.game.loadingStop(); } catch(e) {}", true)
+
+
+func _on_ad_success_internal(_args = []) -> void:
+	_ad_in_progress = false
+	var cb: Callable = _on_success
+	_on_success = Callable()
+	_on_fail = Callable()
+	if cb.is_valid():
+		cb.call()
+
+
+func _on_ad_fail_internal(_args = []) -> void:
+	_ad_in_progress = false
+	var cb: Callable = _on_fail
+	_on_success = Callable()
+	_on_fail = Callable()
+	if cb.is_valid():
+		cb.call()

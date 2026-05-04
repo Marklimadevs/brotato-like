@@ -15,6 +15,7 @@ var _offer_buttons: Array[Button] = []
 var _offer_rich_labels: Array[RichTextLabel] = []
 var _lock_buttons: Array[Button] = []
 var _reroll_button: Button
+var _free_reroll_button: Button
 var _continue_button: Button
 var _sell_list: VBoxContainer
 var _sell_header: Label
@@ -23,6 +24,7 @@ var _weapon_catalog: Array[WeaponResource] = []
 var _current_offers: Array = []  # Array of Dictionary { item, weapon } or null
 var _purchased: Array[bool] = []
 var _locked: Array[bool] = []
+var _free_reroll_used: bool = false
 
 
 func _ready() -> void:
@@ -51,6 +53,7 @@ func _exit_tree() -> void:
 
 
 func _on_shop_opened() -> void:
+	_free_reroll_used = false
 	_roll_offers()
 	_root.visible = true
 	get_tree().paused = true
@@ -95,6 +98,27 @@ func _on_reroll() -> void:
 		return
 	_roll_offers()
 	_update_ui()
+
+
+func _on_free_reroll_pressed() -> void:
+	if _free_reroll_used or _free_reroll_button == null:
+		return
+	_free_reroll_button.disabled = true
+	_free_reroll_button.text = "Carregando anúncio..."
+	AdsManager.request_rewarded_ad(_on_free_reroll_success, _on_free_reroll_fail)
+
+
+func _on_free_reroll_success() -> void:
+	_free_reroll_used = true
+	_roll_offers()
+	_update_ui()
+
+
+func _on_free_reroll_fail() -> void:
+	if _free_reroll_button == null or not is_instance_valid(_free_reroll_button):
+		return
+	_free_reroll_button.disabled = false
+	_free_reroll_button.text = "▶  Reroll grátis (anúncio)"
 
 
 func _on_lock_toggle(idx: int, pressed: bool) -> void:
@@ -348,6 +372,16 @@ func _build_ui() -> void:
 	_reroll_button.add_theme_font_size_override("font_size", 14)
 	_reroll_button.pressed.connect(_on_reroll)
 	left_col.add_child(_reroll_button)
+
+	# Free reroll via rewarded ad — destaque dourado
+	_free_reroll_button = Button.new()
+	_free_reroll_button.text = "▶  Reroll grátis (anúncio)"
+	_free_reroll_button.custom_minimum_size = Vector2(380, 36)
+	_free_reroll_button.add_theme_font_size_override("font_size", 13)
+	_free_reroll_button.add_theme_color_override("font_color", Color(1, 0.85, 0.4))
+	_free_reroll_button.add_theme_color_override("font_hover_color", Color(1, 0.95, 0.55))
+	_free_reroll_button.pressed.connect(_on_free_reroll_pressed)
+	left_col.add_child(_free_reroll_button)
 
 	# RIGHT — sell
 	var right_col := VBoxContainer.new()

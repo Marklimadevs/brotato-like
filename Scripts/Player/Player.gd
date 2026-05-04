@@ -17,6 +17,7 @@ var _iframe_timer: float = 0.0
 var _hit_flash_timer: float = 0.0
 var _regen_accumulator: float = 0.0
 var _alive: bool = true
+var _saved_weapon_data: Array[WeaponResource] = []
 
 
 func is_alive() -> bool:
@@ -161,8 +162,14 @@ func _die() -> void:
 	if not _alive:
 		return
 	_alive = false
-	visible = false
 
+	# Snapshot equipped weapons (for potential revive) BEFORE freeing
+	_saved_weapon_data.clear()
+	for w in get_active_weapons():
+		if w.Data != null:
+			_saved_weapon_data.append(w.Data)
+
+	visible = false
 	set_physics_process(false)
 	collision_layer = 0
 	collision_mask = 0
@@ -175,6 +182,31 @@ func _die() -> void:
 
 	print("Player died!")
 	GameManager.notify_player_died()
+
+
+func revive(hp: int) -> void:
+	if _alive:
+		return
+	_alive = true
+	visible = true
+	set_physics_process(true)
+	collision_layer = 1
+	collision_mask = 16
+	if _hurt_box != null:
+		_hurt_box.monitoring = true
+
+	if stats != null:
+		stats.CurrentHp = mini(stats.MaxHp, maxi(1, hp))
+
+	# Re-spawn weapons from snapshot (preserves player's purchased loadout)
+	for wd in _saved_weapon_data:
+		add_weapon(wd)
+	_saved_weapon_data.clear()
+
+	# Brief invulnerability after revive
+	_iframe_timer = 1.5
+	modulate = Color.WHITE
+	_hit_flash_timer = 0.0
 
 
 func _draw() -> void:
