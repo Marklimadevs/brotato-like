@@ -235,6 +235,12 @@ func _update_ui() -> void:
 	_reroll_button.text = "Reroll (%d mat)" % REROLL_COST
 	_reroll_button.disabled = GameManager.Materials < REROLL_COST
 
+	if _free_reroll_button != null:
+		_free_reroll_button.visible = not _free_reroll_used
+		if not _free_reroll_used:
+			_free_reroll_button.disabled = false
+			_free_reroll_button.text = "▶  Reroll grátis (anúncio)"
+
 	# Sell list
 	for c in _sell_list.get_children():
 		c.queue_free()
