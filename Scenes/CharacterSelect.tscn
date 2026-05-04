@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bcharsel00001"]
 
-[ext_resource type="Script" path="res://Scripts/UI/CharacterSelectScreen.cs" id="1_charsel"]
+[ext_resource type="Script" path="res://Scripts/UI/CharacterSelectScreen.gd" id="1_charsel"]
 [ext_resource type="Resource" uid="uid://bpistol000001" path="res://Resources/Weapons/Pistol.tres" id="2_pistol"]
 [ext_resource type="Resource" uid="uid://cldon16470fga" path="res://Resources/Weapons/SMG.tres" id="3_smg"]
 [ext_resource type="Resource" uid="uid://boky3q4er7a61" path="res://Resources/Weapons/Shotgun.tres" id="4_shotgun"]

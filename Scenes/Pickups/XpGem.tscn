@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dlp7d75h36rfc"]
 
-[ext_resource type="Script" path="res://Scripts/Pickups/XpGem.cs" id="1_xpgem"]
+[ext_resource type="Script" path="res://Scripts/Pickups/XpGem.gd" id="1_xpgem"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xpgem"]
 radius = 7.0

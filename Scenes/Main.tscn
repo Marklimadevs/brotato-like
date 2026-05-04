@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://barena00000001" path="res://Scenes/Arena.tscn" id="1_arena"]
 [ext_resource type="PackedScene" uid="uid://bplayer000001" path="res://Scenes/Player/Player.tscn" id="2_player"]
-[ext_resource type="Script" path="res://Scripts/Core/WaveManager.cs" id="3_wavemgr"]
+[ext_resource type="Script" path="res://Scripts/Core/WaveManager.gd" id="3_wavemgr"]
 [ext_resource type="PackedScene" uid="uid://cv5oh81iou2nc" path="res://Scenes/Enemies/EnemyBase.tscn" id="4_enemyscene"]
 [ext_resource type="Resource" uid="uid://dtt5kgmv6fjqm" path="res://Resources/Enemies/Runner.tres" id="5_runner"]
 [ext_resource type="Resource" uid="uid://df1sa7pi4ynwy" path="res://Resources/Enemies/Swarmer.tres" id="6_swarmer"]

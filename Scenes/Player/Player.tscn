@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://bplayer000001"]
 
-[ext_resource type="Script" path="res://Scripts/Player/Player.cs" id="1_player"]
-[ext_resource type="Script" path="res://Scripts/Core/CameraShake.cs" id="2_camerashake"]
+[ext_resource type="Script" path="res://Scripts/Player/Player.gd" id="1_player"]
+[ext_resource type="Script" path="res://Scripts/Core/CameraShake.gd" id="2_camerashake"]
 [ext_resource type="PackedScene" uid="uid://bweapon000001" path="res://Scenes/Weapons/Weapon.tscn" id="3_weapon"]
 [ext_resource type="Resource" uid="uid://bpistol000001" path="res://Resources/Weapons/Pistol.tres" id="4_pistol"]
 [ext_resource type="Resource" uid="uid://bsmg00000000001" path="res://Resources/Weapons/SMG.tres" id="5_smg"]

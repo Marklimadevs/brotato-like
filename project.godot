@@ -12,22 +12,18 @@ config_version=5
 
 config/name="BrotatoLike"
 run/main_scene="res://Scenes/CharacterSelect.tscn"
-config/features=PackedStringArray("4.6", "C#", "GL Compatibility")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-GameManager="*res://Scripts/Core/GameManager.cs"
+GameManager="*res://Scripts/Core/GameManager.gd"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
-
-[dotnet]
-
-project/assembly_name="BrotatoLike"
 
 [input]
 

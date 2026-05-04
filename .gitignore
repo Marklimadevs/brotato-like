@@ -5,26 +5,15 @@
 export.cfg
 export_presets.cfg
 
-# Build outputs
-.mono/
-.mono_metadata/
-
 # Imported translations
 *.translation
 
-# C# / .NET build outputs
-bin/
-obj/
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.csproj.user
-
-# Mono package
+# Mono / .NET (legacy from C# version, kept for safety)
+.mono/
+.mono_metadata/
 mono_crash.*.json
 
-# Visual Studio / Rider
+# Visual Studio / Rider / VS Code
 .vs/
 .idea/
 *.swp
