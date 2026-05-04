@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://blevelup00001"]
+
+[ext_resource type="Script" path="res://Scripts/UI/LevelUpScreen.cs" id="1_levelup"]
+
+[node name="LevelUpScreen" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_levelup")

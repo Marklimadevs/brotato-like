@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnemyResource" format=3 uid="uid://dtt5kgmv6fjqm"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyResource.cs" id="1_resource"]
+
+[resource]
+script = ExtResource("1_resource")
+MaxHp = 8
+Damage = 5
+Speed = 110.0
+EnemyColor = Color(0.92, 0.38, 0.32, 1)
+Shape = 0
+XpDrop = 1
+Radius = 12.0

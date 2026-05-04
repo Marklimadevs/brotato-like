@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponResource" format=3 uid="uid://cldon16470fga"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/WeaponResource.cs" id="1_resource"]
+[ext_resource type="PackedScene" uid="uid://bbullet000001" path="res://Scenes/Bullets/Bullet.tscn" id="2_bullet"]
+
+[resource]
+script = ExtResource("1_resource")
+WeaponName = "SMG"
+Cost = 14
+Damage = 2
+Cooldown = 0.18
+Range = 320.0
+BulletSpeed = 780.0
+BulletRadius = 4.0
+ProjectileColor = Color(0.45, 0.85, 1, 1)
+BulletScene = ExtResource("2_bullet")
+BarrelColor = Color(0.3, 0.55, 0.7, 1)
+BarrelLength = 16.0
+BarrelWidth = 5.0

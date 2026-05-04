@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyResource" format=3 uid="uid://bugmvd1vnsjoi"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyResource.cs" id="1_resource"]
+[ext_resource type="Resource" uid="uid://df1sa7pi4ynwy" path="res://Resources/Enemies/Swarmer.tres" id="2_swarmer"]
+
+[resource]
+script = ExtResource("1_resource")
+MaxHp = 14
+Damage = 5
+Speed = 80.0
+EnemyColor = Color(0.4, 0.85, 0.85, 1)
+Shape = 1
+XpDrop = 2
+MaterialDrop = 1
+Radius = 14.0
+IsBoss = false
+SplitsOnDeath = true
+SplitInto = ExtResource("2_swarmer")
+SplitCount = 2

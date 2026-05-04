@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyResource" format=3 uid="uid://c5oh3p750fwjg"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyResource.cs" id="1_resource"]
+
+[resource]
+script = ExtResource("1_resource")
+MaxHp = 8
+Damage = 3
+Speed = 60.0
+EnemyColor = Color(0.85, 0.4, 0.85, 1)
+Shape = 2
+XpDrop = 2
+MaterialDrop = 1
+Radius = 12.0
+IsBoss = false
+HasRangedAttack = true
+RangedStopDistance = 280.0
+RangedFireInterval = 2.0
+RangedDamage = 5
+RangedBulletSpeed = 320.0

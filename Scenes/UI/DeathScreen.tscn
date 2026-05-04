@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bdeath0000001"]
+
+[ext_resource type="Script" path="res://Scripts/UI/DeathScreen.cs" id="1_death"]
+
+[node name="DeathScreen" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_death")

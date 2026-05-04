@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bwin000000001"]
+
+[ext_resource type="Script" path="res://Scripts/UI/WinScreen.cs" id="1_win"]
+
+[node name="WinScreen" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_win")

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyResource" format=3 uid="uid://bboss00000001"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyResource.cs" id="1_resource"]
+
+[resource]
+script = ExtResource("1_resource")
+MaxHp = 450
+Damage = 18
+Speed = 70.0
+EnemyColor = Color(0.78, 0.42, 0.95, 1)
+Shape = 3
+XpDrop = 30
+MaterialDrop = 15
+Radius = 32.0
+IsBoss = true

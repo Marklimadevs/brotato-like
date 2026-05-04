@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=3 uid="uid://bplayer000001"]
+
+[ext_resource type="Script" path="res://Scripts/Player/Player.cs" id="1_player"]
+[ext_resource type="Script" path="res://Scripts/Core/CameraShake.cs" id="2_camerashake"]
+[ext_resource type="PackedScene" uid="uid://bweapon000001" path="res://Scenes/Weapons/Weapon.tscn" id="3_weapon"]
+[ext_resource type="Resource" uid="uid://bpistol000001" path="res://Resources/Weapons/Pistol.tres" id="4_pistol"]
+[ext_resource type="Resource" uid="uid://bsmg00000000001" path="res://Resources/Weapons/SMG.tres" id="5_smg"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_player"]
+radius = 16.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurtbox"]
+radius = 17.0
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 1
+collision_mask = 16
+script = ExtResource("1_player")
+Weapon1 = ExtResource("4_pistol")
+Weapon2 = ExtResource("5_smg")
+WeaponScene = ExtResource("3_weapon")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_player")
+
+[node name="HurtBox" type="Area2D" parent="."]
+collision_layer = 1
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="HurtBoxShape" type="CollisionShape2D" parent="HurtBox"]
+shape = SubResource("CircleShape2D_hurtbox")
+
+[node name="WeaponMount" type="Node2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("2_camerashake")
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponResource" format=3 uid="uid://bpistol000001"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/WeaponResource.cs" id="1_resource"]
+[ext_resource type="PackedScene" uid="uid://bbullet000001" path="res://Scenes/Bullets/Bullet.tscn" id="2_bullet"]
+
+[resource]
+script = ExtResource("1_resource")
+WeaponName = "Pistol"
+Cost = 10
+Damage = 4
+Cooldown = 0.55
+Range = 380.0
+BulletSpeed = 700.0
+BulletRadius = 5.0
+ProjectileColor = Color(1, 0.95, 0.5, 1)
+BulletScene = ExtResource("2_bullet")
+BarrelColor = Color(0.55, 0.5, 0.35, 1)
+BarrelLength = 18.0
+BarrelWidth = 6.0

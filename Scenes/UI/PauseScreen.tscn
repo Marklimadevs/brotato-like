@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cvydccyy8liwu"]
+
+[ext_resource type="Script" path="res://Scripts/UI/PauseScreen.cs" id="1_pause"]
+
+[node name="PauseScreen" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_pause")

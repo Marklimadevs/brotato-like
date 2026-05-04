@@ -1,0 +1,15 @@
+[gd_scene load_steps=6 format=3 uid="uid://bshop00000001"]
+
+[ext_resource type="Script" path="res://Scripts/UI/ShopScreen.cs" id="1_shop"]
+[ext_resource type="Resource" uid="uid://bpistol000001" path="res://Resources/Weapons/Pistol.tres" id="2_pistol"]
+[ext_resource type="Resource" uid="uid://cldon16470fga" path="res://Resources/Weapons/SMG.tres" id="3_smg"]
+[ext_resource type="Resource" uid="uid://bshotgun0000001" path="res://Resources/Weapons/Shotgun.tres" id="4_shotgun"]
+[ext_resource type="Resource" uid="uid://bsniper00000001" path="res://Resources/Weapons/Sniper.tres" id="5_sniper"]
+
+[node name="ShopScreen" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_shop")
+ShopWeapon1 = ExtResource("2_pistol")
+ShopWeapon2 = ExtResource("3_smg")
+ShopWeapon3 = ExtResource("4_shotgun")
+ShopWeapon4 = ExtResource("5_sniper")

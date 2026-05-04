@@ -1,0 +1,58 @@
+[gd_scene load_steps=20 format=3 uid="uid://bmain0000000001"]
+
+[ext_resource type="PackedScene" uid="uid://barena00000001" path="res://Scenes/Arena.tscn" id="1_arena"]
+[ext_resource type="PackedScene" uid="uid://bplayer000001" path="res://Scenes/Player/Player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://Scripts/Core/WaveManager.cs" id="3_wavemgr"]
+[ext_resource type="PackedScene" uid="uid://cv5oh81iou2nc" path="res://Scenes/Enemies/EnemyBase.tscn" id="4_enemyscene"]
+[ext_resource type="Resource" uid="uid://dtt5kgmv6fjqm" path="res://Resources/Enemies/Runner.tres" id="5_runner"]
+[ext_resource type="Resource" uid="uid://df1sa7pi4ynwy" path="res://Resources/Enemies/Swarmer.tres" id="6_swarmer"]
+[ext_resource type="Resource" uid="uid://blhg4pomtr5vo" path="res://Resources/Enemies/Tank.tres" id="7_tank"]
+[ext_resource type="Resource" uid="uid://bsplitter000001" path="res://Resources/Enemies/Splitter.tres" id="8_splitter"]
+[ext_resource type="Resource" uid="uid://bcharger0000001" path="res://Resources/Enemies/Charger.tres" id="9_charger"]
+[ext_resource type="Resource" uid="uid://branged00000001" path="res://Resources/Enemies/Ranged.tres" id="10_ranged"]
+[ext_resource type="Resource" uid="uid://bboss00000001" path="res://Resources/Enemies/Boss.tres" id="11_boss"]
+[ext_resource type="PackedScene" uid="uid://c7bb4gtid0age" path="res://Scenes/UI/HUD.tscn" id="12_hud"]
+[ext_resource type="PackedScene" uid="uid://blevelup00001" path="res://Scenes/UI/LevelUpScreen.tscn" id="13_levelup"]
+[ext_resource type="PackedScene" uid="uid://bdeath0000001" path="res://Scenes/UI/DeathScreen.tscn" id="14_death"]
+[ext_resource type="PackedScene" uid="uid://bwin000000001" path="res://Scenes/UI/WinScreen.tscn" id="15_win"]
+[ext_resource type="PackedScene" uid="uid://bstats0000001" path="res://Scenes/UI/StatsPanel.tscn" id="16_stats"]
+[ext_resource type="PackedScene" uid="uid://bshop00000001" path="res://Scenes/UI/ShopScreen.tscn" id="17_shop"]
+[ext_resource type="PackedScene" uid="uid://bpause00000001" path="res://Scenes/UI/PauseScreen.tscn" id="18_pause"]
+[ext_resource type="PackedScene" uid="uid://bwaveintro00001" path="res://Scenes/UI/WaveIntroOverlay.tscn" id="19_intro"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Arena" parent="." instance=ExtResource("1_arena")]
+
+[node name="EnemiesRoot" type="Node2D" parent="."]
+
+[node name="WaveManager" type="Node" parent="."]
+script = ExtResource("3_wavemgr")
+EnemyScene = ExtResource("4_enemyscene")
+RunnerEnemy = ExtResource("5_runner")
+SwarmerEnemy = ExtResource("6_swarmer")
+TankEnemy = ExtResource("7_tank")
+SplitterEnemy = ExtResource("8_splitter")
+ChargerEnemy = ExtResource("9_charger")
+RangedEnemy = ExtResource("10_ranged")
+BossEnemy = ExtResource("11_boss")
+SpawnRootPath = NodePath("../EnemiesRoot")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(0, 0)
+
+[node name="HUD" parent="." instance=ExtResource("12_hud")]
+
+[node name="WaveIntroOverlay" parent="." instance=ExtResource("19_intro")]
+
+[node name="StatsPanel" parent="." instance=ExtResource("16_stats")]
+
+[node name="LevelUpScreen" parent="." instance=ExtResource("13_levelup")]
+
+[node name="ShopScreen" parent="." instance=ExtResource("17_shop")]
+
+[node name="PauseScreen" parent="." instance=ExtResource("18_pause")]
+
+[node name="DeathScreen" parent="." instance=ExtResource("14_death")]
+
+[node name="WinScreen" parent="." instance=ExtResource("15_win")]

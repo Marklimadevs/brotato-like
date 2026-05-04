@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://cv5oh81iou2nc"]
+
+[ext_resource type="Script" path="res://Scripts/Enemies/EnemyBase.cs" id="1_enemy"]
+[ext_resource type="PackedScene" uid="uid://bxpgem00000001" path="res://Scenes/Pickups/XpGem.tscn" id="2_xpgem"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_enemy"]
+radius = 12.0
+
+[node name="EnemyBase" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 16
+script = ExtResource("1_enemy")
+XpGemScene = ExtResource("2_xpgem")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_enemy")

@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://bcharsel00001"]
+
+[ext_resource type="Script" path="res://Scripts/UI/CharacterSelectScreen.cs" id="1_charsel"]
+[ext_resource type="Resource" uid="uid://bpistol000001" path="res://Resources/Weapons/Pistol.tres" id="2_pistol"]
+[ext_resource type="Resource" uid="uid://cldon16470fga" path="res://Resources/Weapons/SMG.tres" id="3_smg"]
+[ext_resource type="Resource" uid="uid://boky3q4er7a61" path="res://Resources/Weapons/Shotgun.tres" id="4_shotgun"]
+[ext_resource type="Resource" uid="uid://dm12f16470fga" path="res://Resources/Weapons/Sniper.tres" id="5_sniper"]
+
+[node name="CharacterSelect" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_charsel")
+PistolWeapon = ExtResource("2_pistol")
+SmgWeapon = ExtResource("3_smg")
+ShotgunWeapon = ExtResource("4_shotgun")
+SniperWeapon = ExtResource("5_sniper")
