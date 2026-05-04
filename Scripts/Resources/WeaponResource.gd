@@ -5,7 +5,7 @@ extends Resource
 @export var Cost: int = 10
 @export var Damage: int = 4
 @export var Cooldown: float = 0.55
-@export var Range: float = 380.0
+@export var Reach: float = 380.0
 @export var BulletSpeed: float = 700.0
 @export var BulletRadius: float = 5.0
 @export var ProjectileColor: Color = Color(1, 0.95, 0.5)

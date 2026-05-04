@@ -1,7 +1,7 @@
 class_name EnemyBase
 extends CharacterBody2D
 
-@export var Resource: EnemyResource
+@export var Data: EnemyResource
 @export var XpGemScene: PackedScene
 
 var _hp: int = 0
@@ -40,7 +40,7 @@ func get_scaled_speed() -> float:
 
 
 func is_boss() -> bool:
-	return Resource != null and Resource.IsBoss
+	return Data != null and Data.IsBoss
 
 
 func _ready() -> void:
@@ -48,18 +48,18 @@ func _ready() -> void:
 	_shape = _collision_shape.shape.duplicate() as CircleShape2D
 	_collision_shape.shape = _shape
 
-	if Resource != null:
-		apply_resource(Resource)
+	if Data != null:
+		apply_resource(Data)
 
 	GameManager.register_enemy(self)
 
 	if is_boss():
 		_attach_boss_attack()
-	elif Resource != null and Resource.HasRangedAttack:
+	elif Data != null and Data.HasRangedAttack:
 		_attach_ranged_attack()
 
-	if Resource != null and Resource.IsCharger:
-		_charge_interval_timer = Resource.ChargeInterval
+	if Data != null and Data.IsCharger:
+		_charge_interval_timer = Data.ChargeInterval
 
 
 func _attach_boss_attack() -> void:
@@ -77,14 +77,14 @@ func _attach_ranged_attack() -> void:
 		return
 	var attack: RangedAttack = RangedAttack.new()
 	attack.EnemyBulletScene = bullet_scene
-	attack.FireInterval = Resource.RangedFireInterval
-	attack.Damage = Resource.RangedDamage
-	attack.BulletSpeed = Resource.RangedBulletSpeed
+	attack.FireInterval = Data.RangedFireInterval
+	attack.Damage = Data.RangedDamage
+	attack.BulletSpeed = Data.RangedBulletSpeed
 	add_child(attack)
 
 
 func apply_resource(res: EnemyResource) -> void:
-	Resource = res
+	Data = res
 	var diff = DifficultyConfig.get_multipliers(GameManager.SelectedDifficulty)
 	_scaled_max_hp = maxi(1, int(res.MaxHp * diff["hp_mult"]))
 	_scaled_damage = maxi(1, int(res.Damage * diff["damage_mult"]))
@@ -99,7 +99,7 @@ func _physics_process(delta: float) -> void:
 	if _dead:
 		return
 	var player: Player = GameManager.Player
-	if player == null or Resource == null:
+	if player == null or Data == null:
 		return
 
 	var to_player: Vector2 = player.global_position - global_position
@@ -110,10 +110,10 @@ func _physics_process(delta: float) -> void:
 		_knockback_timer -= delta
 		velocity = _knockback_velocity
 		_knockback_velocity = _knockback_velocity.lerp(Vector2.ZERO, delta * 8.0)
-	elif Resource.IsCharger:
+	elif Data.IsCharger:
 		_update_charger(delta, dir_to_player)
-	elif Resource.HasRangedAttack:
-		if dist_to_player < Resource.RangedStopDistance:
+	elif Data.HasRangedAttack:
+		if dist_to_player < Data.RangedStopDistance:
 			velocity = Vector2.ZERO
 		else:
 			velocity = dir_to_player * _scaled_speed
@@ -128,17 +128,17 @@ func _update_charger(delta: float, dir_to_player: Vector2) -> void:
 		_charging_timer -= delta
 		if _charging_timer <= 0.0:
 			_is_charging = false
-			_charge_interval_timer = Resource.ChargeInterval
+			_charge_interval_timer = Data.ChargeInterval
 		else:
-			velocity = _charge_dir * _scaled_speed * Resource.ChargeSpeedMult
+			velocity = _charge_dir * _scaled_speed * Data.ChargeSpeedMult
 		return
 
 	_charge_interval_timer -= delta
 	if _charge_interval_timer <= 0.0:
 		_is_charging = true
-		_charging_timer = Resource.ChargeDuration
+		_charging_timer = Data.ChargeDuration
 		_charge_dir = dir_to_player
-		velocity = _charge_dir * _scaled_speed * Resource.ChargeSpeedMult
+		velocity = _charge_dir * _scaled_speed * Data.ChargeSpeedMult
 	else:
 		velocity = dir_to_player * _scaled_speed
 
@@ -149,8 +149,8 @@ func _process(delta: float) -> void:
 		if _flash_timer <= 0.0:
 			modulate = Color.WHITE
 
-	# Charger telegraph: pulse modulate while approaching charge
-	if Resource != null and Resource.IsCharger and not _is_charging and _flash_timer <= 0.0:
+	# Charger telegraph
+	if Data != null and Data.IsCharger and not _is_charging and _flash_timer <= 0.0:
 		var remaining: float = _charge_interval_timer
 		if remaining < 0.6:
 			var t: float = 1.0 - (remaining / 0.6)
@@ -169,7 +169,7 @@ func take_damage(dmg: int, is_crit: bool = false) -> void:
 	_flash_timer = 0.06
 
 	var color: Color = Color(1, 0.85, 0.2) if is_crit else Color(1, 1, 0.7)
-	var pos_y: float = -(Resource.Radius if Resource != null else 12.0) - 2.0
+	var pos_y: float = -(Data.Radius if Data != null else 12.0) - 2.0
 	DamageNumber.spawn(get_tree().current_scene, global_position + Vector2(0, pos_y), dmg, color, is_crit)
 
 	if _hp <= 0:
@@ -187,7 +187,7 @@ func _die() -> void:
 	_dead = true
 	_spawn_death_particles()
 	_spawn_xp_gem()
-	if Resource != null and Resource.SplitsOnDeath and Resource.SplitInto != null and Resource.SplitCount > 0:
+	if Data != null and Data.SplitsOnDeath and Data.SplitInto != null and Data.SplitCount > 0:
 		_spawn_splits()
 	if is_boss() and WaveManager.Instance != null:
 		WaveManager.Instance.notify_boss_killed()
@@ -202,20 +202,20 @@ func _spawn_splits() -> void:
 	var parent: Node = get_parent()
 	if parent == null or not is_instance_valid(parent):
 		return
-	for i in range(Resource.SplitCount):
+	for i in range(Data.SplitCount):
 		var split: EnemyBase = enemy_scene.instantiate()
-		split.Resource = Resource.SplitInto
+		split.Data = Data.SplitInto
 		var offset := Vector2(rng.randf_range(-20.0, 20.0), rng.randf_range(-20.0, 20.0))
 		parent.add_child(split)
 		split.global_position = global_position + offset
 
 
 func _spawn_xp_gem() -> void:
-	if XpGemScene == null or Resource == null or Resource.XpDrop <= 0:
+	if XpGemScene == null or Data == null or Data.XpDrop <= 0:
 		return
 	var gem: XpGem = XpGemScene.instantiate()
-	gem.Value = Resource.XpDrop
-	gem.MaterialValue = Resource.MaterialDrop
+	gem.Value = Data.XpDrop
+	gem.MaterialValue = Data.MaterialDrop
 	get_tree().current_scene.add_child(gem)
 	gem.global_position = global_position
 
@@ -234,7 +234,7 @@ func _spawn_death_particles() -> void:
 	particles.gravity = Vector2.ZERO
 	particles.scale_amount_min = 3.0 if is_boss() else 2.0
 	particles.scale_amount_max = 6.0 if is_boss() else 4.0
-	particles.color = Resource.EnemyColor if Resource != null else Color.WHITE
+	particles.color = Data.EnemyColor if Data != null else Color.WHITE
 	get_tree().current_scene.add_child(particles)
 	particles.global_position = global_position
 	particles.finished.connect(func():
@@ -243,12 +243,12 @@ func _spawn_death_particles() -> void:
 
 
 func _draw() -> void:
-	if Resource == null:
+	if Data == null:
 		return
-	var c: Color = Resource.EnemyColor
-	var r: float = Resource.Radius
+	var c: Color = Data.EnemyColor
+	var r: float = Data.Radius
 
-	match Resource.Shape:
+	match Data.Shape:
 		EnemyResource.EnemyShape.TRIANGLE:
 			draw_colored_polygon(PackedVector2Array([
 				Vector2(0, -r * 1.3),
@@ -274,21 +274,18 @@ func _draw() -> void:
 				Vector2(-r * 0.45, -r * 0.45),
 			]), c)
 		EnemyResource.EnemyShape.BOSS_DIAMOND:
-			# Outer translucent halo
 			draw_colored_polygon(PackedVector2Array([
 				Vector2(0, -r * 1.7),
 				Vector2(r * 1.7, 0),
 				Vector2(0, r * 1.7),
 				Vector2(-r * 1.7, 0),
 			]), Color(c.r, c.g, c.b, 0.25))
-			# Mid layer
 			draw_colored_polygon(PackedVector2Array([
 				Vector2(0, -r * 1.35),
 				Vector2(r * 1.35, 0),
 				Vector2(0, r * 1.35),
 				Vector2(-r * 1.35, 0),
 			]), c)
-			# Inner brighter core
 			draw_colored_polygon(PackedVector2Array([
 				Vector2(0, -r * 0.55),
 				Vector2(r * 0.55, 0),

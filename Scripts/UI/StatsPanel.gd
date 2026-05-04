@@ -107,21 +107,21 @@ func _refresh() -> void:
 
 	var idx: int = 0
 	for w in p.get_active_weapons():
-		if w == null or w.Resource == null:
+		if w == null or w.Data == null:
 			continue
 		while _weapon_rows.size() <= idx:
 			_weapon_rows.append(_build_weapon_row())
 
 		var row: Dictionary = _weapon_rows[idx]
 		row["box"].visible = true
-		row["name"].text = w.Resource.WeaponName
-		if w.Resource.Pellets > 1:
-			row["damage"].text = "%d × %d" % [w.get_effective_damage(), w.Resource.Pellets]
+		row["name"].text = w.Data.WeaponName
+		if w.Data.Pellets > 1:
+			row["damage"].text = "%d × %d" % [w.get_effective_damage(), w.Data.Pellets]
 		else:
 			row["damage"].text = "%d" % w.get_effective_damage()
 		row["fire_rate"].text = "%.2f/s" % w.get_effective_fire_rate()
-		row["range"].text = "%d" % int(w.Resource.Range)
-		row["bullet_speed"].text = "%d" % int(w.Resource.BulletSpeed)
+		row["range"].text = "%d" % int(w.Data.Reach)
+		row["bullet_speed"].text = "%d" % int(w.Data.BulletSpeed)
 		idx += 1
 	for i in range(idx, _weapon_rows.size()):
 		_weapon_rows[i]["box"].visible = false

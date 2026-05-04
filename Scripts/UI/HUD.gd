@@ -108,7 +108,7 @@ func _process(_delta: float) -> void:
 			_timer_label.text = "Mate o Boss!"
 			_boss_label.visible = true
 			_boss_hp_bar.visible = true
-			_boss_hp_bar.max_value = boss.get_scaled_max_hp() if boss.get_scaled_max_hp() > 0 else (boss.Resource.MaxHp if boss.Resource != null else 1)
+			_boss_hp_bar.max_value = boss.get_scaled_max_hp() if boss.get_scaled_max_hp() > 0 else (boss.Data.MaxHp if boss.Data != null else 1)
 			_boss_hp_bar.value = maxi(0, boss.get_current_hp())
 		else:
 			_boss_label.visible = false

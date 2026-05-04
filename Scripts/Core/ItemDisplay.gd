@@ -30,7 +30,7 @@ static func format_shop_weapon_bbcode(w: WeaponResource, slots_used: int, slots_
 	var dmg_str: String = "%d×%d" % [w.Damage, w.Pellets] if w.Pellets > 1 else "%d" % w.Damage
 	var extra: String = ", Penetra %d" % (w.Pierce + 1) if w.Pierce > 0 else ""
 	return "[center][color=#%s][b]⚔ %s[/b]   ·   Arma[/color]\n[color=#dddddd]Dmg [color=#8aff8a]%s[/color], CD %.2fs, Range %d%s[/color]\n[color=#ffd84a]%d mat[/color]   [color=#888888](%d/%d slots)[/color][/center]" % [
-		rarity_hex, w.WeaponName, dmg_str, w.Cooldown, int(w.Range), extra, w.Cost, slots_used, slots_max
+		rarity_hex, w.WeaponName, dmg_str, w.Cooldown, int(w.Reach), extra, w.Cost, slots_used, slots_max
 	]
 
 
@@ -39,9 +39,9 @@ static func format_purchased_bbcode(title: String) -> String:
 
 
 static func format_weapon_tooltip_bbcode(w: Weapon) -> String:
-	if w == null or w.Resource == null:
+	if w == null or w.Data == null:
 		return ""
-	var res: WeaponResource = w.Resource
+	var res: WeaponResource = w.Data
 	var sb := ""
 	sb += "[b][color=#8acaff]⚔ %s[/color][/b]\n" % res.WeaponName
 	sb += "[color=#555555]─────────────────[/color]\n"
@@ -53,7 +53,7 @@ static func format_weapon_tooltip_bbcode(w: Weapon) -> String:
 		sb += "Dano: [color=#8aff8a]%d[/color]\n" % total_dmg
 
 	sb += "Fire rate: [color=#8aff8a]%.2f/s[/color]  (CD %.2fs)\n" % [w.get_effective_fire_rate(), res.Cooldown]
-	sb += "Range: [color=#8aff8a]%d[/color]\n" % int(res.Range)
+	sb += "Range: [color=#8aff8a]%d[/color]\n" % int(res.Reach)
 	sb += "Vel. bullet: %d\n" % int(res.BulletSpeed)
 
 	if res.Pellets > 1 and res.SpreadAngleDeg > 0:

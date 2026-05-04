@@ -217,13 +217,13 @@ func _update_ui() -> void:
 	if player != null:
 		var idx: int = 0
 		for w in player.get_active_weapons():
-			if w == null or w.Resource == null:
+			if w == null or w.Data == null:
 				idx += 1
 				continue
-			var sell_value: int = w.Resource.SellValue
+			var sell_value: int = w.Data.SellValue
 			var weapon_index: int = idx
 			var sell_btn := RichTooltipButton.new()
-			sell_btn.text = "Vender %s  +%d mat" % [w.Resource.WeaponName, sell_value]
+			sell_btn.text = "Vender %s  +%d mat" % [w.Data.WeaponName, sell_value]
 			sell_btn.custom_minimum_size = Vector2(260, 36)
 			sell_btn.tooltip_text = ItemDisplay.format_weapon_tooltip_bbcode(w)
 			sell_btn.add_theme_font_size_override("font_size", 14)

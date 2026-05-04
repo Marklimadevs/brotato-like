@@ -70,7 +70,7 @@ func _check_enemy_contact() -> void:
 	if _hurt_box == null:
 		return
 	for body in _hurt_box.get_overlapping_bodies():
-		if body is EnemyBase and body.Resource != null:
+		if body is EnemyBase and body.Data != null:
 			take_damage(body.get_scaled_damage())
 			return
 
@@ -100,7 +100,7 @@ func add_weapon(res: WeaponResource) -> bool:
 	if get_equipped_weapon_count() >= MAX_WEAPON_SLOTS:
 		return false
 	var w: Weapon = WeaponScene.instantiate()
-	w.Resource = res
+	w.Data = res
 	_weapon_mount.add_child(w)
 	_layout_weapons()
 	return true

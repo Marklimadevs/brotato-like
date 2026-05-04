@@ -156,7 +156,7 @@ func _spawn_boss() -> void:
 		return
 	_boss_spawned = true
 	var enemy: EnemyBase = EnemyScene.instantiate()
-	enemy.Resource = BossEnemy
+	enemy.Data = BossEnemy
 	enemy.position = Vector2(0.0, -ArenaSize.y / 2.0 + SpawnMargin)
 	_spawn_root.add_child(enemy)
 	CurrentBoss = enemy
@@ -189,7 +189,7 @@ func _spawn_batch(wave: Dictionary) -> void:
 
 func _spawn_one(res: EnemyResource) -> void:
 	var enemy: EnemyBase = EnemyScene.instantiate()
-	enemy.Resource = res
+	enemy.Data = res
 	enemy.position = _random_edge_position()
 	_spawn_root.add_child(enemy)
 
