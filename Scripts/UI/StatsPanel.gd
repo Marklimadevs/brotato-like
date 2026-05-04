@@ -37,16 +37,16 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	if GameManager == null: return
-	for sig_name_pair in [
-		["level_up", _on_force_show], ["level_up_closed", _on_force_hide],
-		["shop_opened", _on_force_show], ["shop_closed", _on_force_hide],
-		["player_died", _on_player_died],
-	]:
-		var sig_name: String = sig_name_pair[0]
-		var handler: Callable = sig_name_pair[1]
-		var sig: Signal = GameManager.get(sig_name)
-		if sig.is_connected(handler):
-			sig.disconnect(handler)
+	if GameManager.level_up.is_connected(_on_force_show):
+		GameManager.level_up.disconnect(_on_force_show)
+	if GameManager.level_up_closed.is_connected(_on_force_hide):
+		GameManager.level_up_closed.disconnect(_on_force_hide)
+	if GameManager.shop_opened.is_connected(_on_force_show):
+		GameManager.shop_opened.disconnect(_on_force_show)
+	if GameManager.shop_closed.is_connected(_on_force_hide):
+		GameManager.shop_closed.disconnect(_on_force_hide)
+	if GameManager.player_died.is_connected(_on_player_died):
+		GameManager.player_died.disconnect(_on_player_died)
 
 
 func _input(event: InputEvent) -> void:
