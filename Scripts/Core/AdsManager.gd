@@ -44,10 +44,11 @@ func _ready() -> void:
 	var detected: bool = false
 	for i in range(20):  # até 2s (20 × 0.1s)
 		var has_sdk = JavaScriptBridge.eval(
-			"typeof window.CrazyGames !== 'undefined' && typeof window.CrazyGames.SDK !== 'undefined'",
+			"(typeof window.CrazyGames !== 'undefined' && typeof window.CrazyGames.SDK !== 'undefined') ? 1 : 0",
 			true
 		)
-		if has_sdk == true:
+		# eval retorna int (1/0), não bool — usar truthy check
+		if has_sdk:
 			detected = true
 			break
 		await get_tree().create_timer(0.1).timeout
@@ -126,11 +127,19 @@ func request_rewarded_ad(on_success: Callable, on_fail: Callable) -> void:
 	_on_fail = on_fail
 
 	if not _sdk_available:
-		# Editor / sem SDK — simula sucesso após delay (pra UX feel)
-		print("AdsManager: simulando rewarded ad (SDK indisponível)")
-		await get_tree().create_timer(1.5).timeout
-		_on_ad_success_internal([])
-		return
+		# REGRA CRÍTICA: em produção (web), nunca dar reward sem ad real.
+		# Ad blocker / SDK fail / sem fill = jogador não ganha o reward.
+		# Em editor (Windows nativo), simula sucesso pra dev poder testar UX.
+		if OS.has_feature("web"):
+			print("AdsManager: SDK indisponível em produção — fail (sem reward)")
+			await get_tree().create_timer(0.4).timeout
+			_on_ad_fail_internal([])
+			return
+		else:
+			print("AdsManager: simulando rewarded ad (editor dev mode)")
+			await get_tree().create_timer(1.5).timeout
+			_on_ad_success_internal([])
+			return
 
 	# Produção — chama o SDK do CrazyGames
 	print("AdsManager: requestAd('rewarded')...")

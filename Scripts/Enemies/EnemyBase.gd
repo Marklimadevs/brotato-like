@@ -195,6 +195,9 @@ func _die() -> void:
 
 
 func _spawn_splits() -> void:
+	# DEFERRED: chamado de dentro do physics callback (Bullet.body_entered →
+	# take_damage → _die). Adicionar Area2D/CharacterBody2D synchronously
+	# dispara erro "Can't change state while flushing queries".
 	var enemy_scene: PackedScene = load("res://Scenes/Enemies/EnemyBase.tscn")
 	if enemy_scene == null:
 		return
@@ -206,18 +209,20 @@ func _spawn_splits() -> void:
 		var split: EnemyBase = enemy_scene.instantiate()
 		split.Data = Data.SplitInto
 		var offset := Vector2(rng.randf_range(-20.0, 20.0), rng.randf_range(-20.0, 20.0))
-		parent.add_child(split)
-		split.global_position = global_position + offset
+		split.position = global_position + offset  # local pos = world pos (parent at origin)
+		parent.add_child.call_deferred(split)
 
 
 func _spawn_xp_gem() -> void:
+	# DEFERRED: ver comentário em _spawn_splits. XpGem é Area2D — Godot
+	# não permite habilitar monitoring durante physics flush.
 	if XpGemScene == null or Data == null or Data.XpDrop <= 0:
 		return
 	var gem: XpGem = XpGemScene.instantiate()
 	gem.Value = Data.XpDrop
 	gem.MaterialValue = Data.MaterialDrop
-	get_tree().current_scene.add_child(gem)
-	gem.global_position = global_position
+	gem.position = global_position  # local pos = world pos (current_scene at origin)
+	get_tree().current_scene.add_child.call_deferred(gem)
 
 
 func _spawn_death_particles() -> void:
