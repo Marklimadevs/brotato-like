@@ -2,8 +2,14 @@ extends Node
 
 # AdsManager — autoload singleton.
 # Ponte com o SDK do CrazyGames v3 via JavaScriptBridge.
-# Em editor (F5) ou fora da web: simula sucesso após 0.6s pra testar a UX
-# sem precisar uplodar.
+#
+# Fluxo:
+#   1. _ready espera o <script> do SDK carregar (retry até 2s)
+#   2. Chama window.CrazyGames.SDK.init() — Promise async
+#   3. Quando o Promise resolve → _sdk_available = true e podemos pedir ads
+#
+# Em editor (F5) ou fora da web: simula sucesso após 1.2s pra você ver
+# o "Carregando anúncio..." e ter sensação de tempo de ad.
 #
 # Uso:
 #   AdsManager.request_rewarded_ad(
@@ -19,33 +25,86 @@ var _on_fail: Callable = Callable()
 # JavaScriptObject refs precisam ficar vivas para o JS chamar de volta
 var _success_cb = null
 var _fail_cb = null
+var _sdk_ready_cb = null
+var _sdk_failed_cb = null
 
 
 func _ready() -> void:
 	if not OS.has_feature("web"):
 		print("AdsManager: rodando fora da web — modo dev (ads simulados).")
 		return
-	if not Engine.has_singleton("JavaScriptBridge"):
-		print("AdsManager: JavaScriptBridge indisponível.")
+
+	# Setup callbacks ANTES de qualquer chamada de SDK
+	_setup_callbacks()
+
+	# Aguarda 1 frame pro DOM estabilizar
+	await get_tree().process_frame
+
+	# Detecta SDK com retry (script tag é async, pode não ter carregado ainda)
+	var detected: bool = false
+	for i in range(20):  # até 2s (20 × 0.1s)
+		var has_sdk = JavaScriptBridge.eval(
+			"typeof window.CrazyGames !== 'undefined' && typeof window.CrazyGames.SDK !== 'undefined'",
+			true
+		)
+		if has_sdk == true:
+			detected = true
+			break
+		await get_tree().create_timer(0.1).timeout
+
+	if not detected:
+		print("AdsManager: SDK do CrazyGames não detectado após 2s — modo simulado (provavelmente rodando localmente ou fora do iframe deles).")
 		return
 
-	var result = JavaScriptBridge.eval("typeof window.CrazyGames !== 'undefined'", true)
-	_sdk_available = (result == true)
+	print("AdsManager: SDK detectado, chamando init()...")
 
-	if _sdk_available:
-		print("AdsManager: CrazyGames SDK detectado ✓")
-		_setup_callbacks()
-	else:
-		print("AdsManager: SDK do CrazyGames não disponível — usando modo simulado.")
+	# Chama SDK.init() — assíncrono. _on_sdk_ready_internal seta _sdk_available
+	# quando o Promise resolve. Se init() não existir (SDK velho), assume pronto.
+	JavaScriptBridge.eval("""
+		try {
+			console.log('[AdsManager] CrazyGames SDK encontrado, chamando init()');
+			if (window.CrazyGames.SDK.init) {
+				window.CrazyGames.SDK.init()
+					.then(function() {
+						console.log('[AdsManager] SDK.init() resolveu OK');
+						if (window.godotSdkReady) window.godotSdkReady();
+					})
+					.catch(function(err) {
+						console.error('[AdsManager] SDK.init() falhou:', err);
+						if (window.godotSdkFailed) window.godotSdkFailed();
+					});
+			} else {
+				console.log('[AdsManager] SDK sem método init — assumindo pronto');
+				if (window.godotSdkReady) window.godotSdkReady();
+			}
+		} catch(e) {
+			console.error('[AdsManager] erro chamando init:', e);
+			if (window.godotSdkFailed) window.godotSdkFailed();
+		}
+	""", true)
 
 
 func _setup_callbacks() -> void:
 	_success_cb = JavaScriptBridge.create_callback(_on_ad_success_internal)
 	_fail_cb = JavaScriptBridge.create_callback(_on_ad_fail_internal)
+	_sdk_ready_cb = JavaScriptBridge.create_callback(_on_sdk_ready_internal)
+	_sdk_failed_cb = JavaScriptBridge.create_callback(_on_sdk_failed_internal)
 	var window = JavaScriptBridge.get_interface("window")
 	if window != null:
 		window.godotAdSuccess = _success_cb
 		window.godotAdFail = _fail_cb
+		window.godotSdkReady = _sdk_ready_cb
+		window.godotSdkFailed = _sdk_failed_cb
+
+
+func _on_sdk_ready_internal(_args = []) -> void:
+	_sdk_available = true
+	print("AdsManager: ✓ SDK pronto, ads habilitados")
+
+
+func _on_sdk_failed_internal(_args = []) -> void:
+	_sdk_available = false
+	print("AdsManager: ✗ SDK falhou no init — modo simulado")
 
 
 func is_real_sdk_available() -> bool:
@@ -57,7 +116,7 @@ func is_ad_in_progress() -> bool:
 
 
 # Pede um rewarded ad. Sempre retorna por callback (assíncrono).
-# Em editor / sem SDK, simula sucesso após delay.
+# Em editor / sem SDK, simula sucesso após delay perceptível.
 func request_rewarded_ad(on_success: Callable, on_fail: Callable) -> void:
 	if _ad_in_progress:
 		on_fail.call()
@@ -67,26 +126,33 @@ func request_rewarded_ad(on_success: Callable, on_fail: Callable) -> void:
 	_on_fail = on_fail
 
 	if not _sdk_available:
-		# Editor / sem SDK — simula sucesso após meio segundo
-		print("AdsManager: simulando rewarded ad bem-sucedido")
-		await get_tree().create_timer(0.6).timeout
+		# Editor / sem SDK — simula sucesso após delay (pra UX feel)
+		print("AdsManager: simulando rewarded ad (SDK indisponível)")
+		await get_tree().create_timer(1.5).timeout
 		_on_ad_success_internal([])
 		return
 
 	# Produção — chama o SDK do CrazyGames
+	print("AdsManager: requestAd('rewarded')...")
 	JavaScriptBridge.eval("""
 		try {
 			window.CrazyGames.SDK.ad.requestAd('rewarded')
-				.then(function() { window.godotAdSuccess(); })
-				.catch(function() { window.godotAdFail(); });
+				.then(function() {
+					console.log('[AdsManager] ad concluído');
+					window.godotAdSuccess();
+				})
+				.catch(function(err) {
+					console.warn('[AdsManager] ad falhou/pulado:', err);
+					window.godotAdFail();
+				});
 		} catch(e) {
+			console.error('[AdsManager] erro requestAd:', e);
 			window.godotAdFail();
 		}
 	""", true)
 
 
-# Notificações de gameplay state pro CrazyGames decidir quando mostrar ads
-# institucionais. Chamadas seguras (no-op em editor).
+# Notificações de gameplay state pro CrazyGames decidir quando mostrar ads.
 func notify_gameplay_start() -> void:
 	if not _sdk_available: return
 	JavaScriptBridge.eval("try { window.CrazyGames.SDK.game.gameplayStart(); } catch(e) {}", true)
