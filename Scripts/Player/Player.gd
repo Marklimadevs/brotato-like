@@ -9,7 +9,7 @@ const MAX_WEAPON_SLOTS := 4
 @export var Weapon2: WeaponResource
 @export var WeaponScene: PackedScene
 
-var Stats: Stats
+var stats: Stats
 var _weapon_mount: Node2D
 var _hurt_box: Area2D
 var _camera: CameraShake
@@ -31,7 +31,7 @@ func get_equipped_weapon_count() -> int:
 
 
 func _ready() -> void:
-	Stats = Stats.new()
+	stats = Stats.new()
 	GameManager.Player = self
 
 	_weapon_mount = get_node("WeaponMount")
@@ -59,7 +59,7 @@ func _physics_process(delta: float) -> void:
 		_iframe_timer -= delta
 
 	var dir: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = dir * Stats.MoveSpeed
+	velocity = dir * stats.MoveSpeed
 	move_and_slide()
 
 	if _iframe_timer <= 0.0:
@@ -82,14 +82,14 @@ func _process(delta: float) -> void:
 			modulate = Color.WHITE
 
 	# HP regen
-	if _alive and Stats != null and Stats.HpRegenPerSec > 0.0 and Stats.CurrentHp < Stats.MaxHp:
-		_regen_accumulator += Stats.HpRegenPerSec * delta
+	if _alive and stats != null and stats.HpRegenPerSec > 0.0 and stats.CurrentHp < stats.MaxHp:
+		_regen_accumulator += stats.HpRegenPerSec * delta
 		if _regen_accumulator >= 1.0:
 			var amount: int = int(floor(_regen_accumulator))
 			_regen_accumulator -= amount
-			var old_hp: int = Stats.CurrentHp
-			Stats.CurrentHp = mini(Stats.MaxHp, Stats.CurrentHp + amount)
-			var gained: int = Stats.CurrentHp - old_hp
+			var old_hp: int = stats.CurrentHp
+			stats.CurrentHp = mini(stats.MaxHp, stats.CurrentHp + amount)
+			var gained: int = stats.CurrentHp - old_hp
 			if gained > 0:
 				DamageNumber.spawn_text(get_tree().current_scene, global_position + Vector2(0, -Radius - 4), "+%d" % gained, Color(0.5, 1, 0.55))
 
@@ -143,8 +143,8 @@ func take_damage(dmg: int) -> void:
 	if not _alive or _iframe_timer > 0.0:
 		return
 	# Apply armor (always at least 1 dmg)
-	var actual_dmg: int = maxi(1, dmg - Stats.Armor)
-	Stats.CurrentHp -= actual_dmg
+	var actual_dmg: int = maxi(1, dmg - stats.Armor)
+	stats.CurrentHp -= actual_dmg
 	_iframe_timer = 0.45
 	modulate = Color(3, 1.4, 1.4)
 	_hit_flash_timer = 0.08
@@ -153,7 +153,7 @@ func take_damage(dmg: int) -> void:
 	if _camera != null:
 		_camera.shake(11.0)
 
-	if Stats.CurrentHp <= 0:
+	if stats.CurrentHp <= 0:
 		_die()
 
 

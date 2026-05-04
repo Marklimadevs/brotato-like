@@ -90,11 +90,11 @@ func _make_label(text: String, pos: Vector2, font_size: int) -> Label:
 
 func _process(_delta: float) -> void:
 	var p: Player = GameManager.Player
-	if p != null and p.Stats != null and _hp_bar != null:
-		var cur_hp: int = maxi(0, p.Stats.CurrentHp)
-		_hp_bar.max_value = p.Stats.MaxHp
+	if p != null and p.stats != null and _hp_bar != null:
+		var cur_hp: int = maxi(0, p.stats.CurrentHp)
+		_hp_bar.max_value = p.stats.MaxHp
 		_hp_bar.value = cur_hp
-		_hp_label.text = "%d / %d" % [cur_hp, p.Stats.MaxHp]
+		_hp_label.text = "%d / %d" % [cur_hp, p.stats.MaxHp]
 
 	var wm: WaveManager = WaveManager.Instance
 	if wm != null and _wave_label != null:

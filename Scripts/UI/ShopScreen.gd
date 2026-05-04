@@ -85,7 +85,7 @@ func _on_buy(idx: int) -> void:
 	else:
 		if not GameManager.spend_material(cost):
 			return
-		offer["item"].apply(player.Stats)
+		offer["item"].apply(player.stats)
 	_purchased[idx] = true
 	_update_ui()
 

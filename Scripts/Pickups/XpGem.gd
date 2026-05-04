@@ -29,8 +29,8 @@ func _physics_process(delta: float) -> void:
 	var to_player: Vector2 = _player.global_position - global_position
 	var dist: float = to_player.length()
 	var magnet_r: float = 80.0
-	if _player.Stats != null:
-		magnet_r = _player.Stats.PickupRadius
+	if _player.stats != null:
+		magnet_r = _player.stats.PickupRadius
 
 	if _attracting or dist < magnet_r:
 		_attracting = true

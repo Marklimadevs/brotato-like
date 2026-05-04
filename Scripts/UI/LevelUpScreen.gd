@@ -160,8 +160,8 @@ func _on_reroll() -> void:
 
 
 func _on_button_pressed(idx: int) -> void:
-	if idx < _current_choices.size() and GameManager.Player != null and GameManager.Player.Stats != null:
-		_current_choices[idx].apply(GameManager.Player.Stats)
+	if idx < _current_choices.size() and GameManager.Player != null and GameManager.Player.stats != null:
+		_current_choices[idx].apply(GameManager.Player.stats)
 
 	if _pending > 0:
 		_show_one()

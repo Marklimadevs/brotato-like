@@ -54,15 +54,15 @@ func _on_body_entered(body: Node2D) -> void:
 		var is_crit: bool = false
 		var final_dmg: int = Damage
 
-		if player != null and player.Stats != null:
-			if GameManager.Rng.randf() < player.Stats.CritChance:
+		if player != null and player.stats != null:
+			if GameManager.Rng.randf() < player.stats.CritChance:
 				is_crit = true
-				final_dmg = maxi(1, int(Damage * player.Stats.CritMultiplier))
+				final_dmg = maxi(1, int(Damage * player.stats.CritMultiplier))
 
 		enemy.take_damage(final_dmg, is_crit)
 
-		if player != null and player.Stats != null and player.Stats.Knockback > 0.0:
-			enemy.apply_knockback(Direction * player.Stats.Knockback)
+		if player != null and player.stats != null and player.stats.Knockback > 0.0:
+			enemy.apply_knockback(Direction * player.stats.Knockback)
 
 		_hits_remaining -= 1
 		if _hits_remaining <= 0:

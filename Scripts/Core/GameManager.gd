@@ -40,8 +40,8 @@ func unregister_enemy(e: EnemyBase) -> void:
 
 func add_xp(amount: int) -> void:
 	var mult: float = 1.0
-	if Player != null and Player.Stats != null:
-		mult = Player.Stats.XpGainMult
+	if Player != null and Player.stats != null:
+		mult = Player.stats.XpGainMult
 	Xp += maxi(1, int(amount * mult))
 	xp_changed.emit()
 	while Xp >= XpForNextLevel:

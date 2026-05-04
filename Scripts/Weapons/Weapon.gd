@@ -12,8 +12,8 @@ func get_effective_damage() -> int:
 	if Data == null:
 		return 0
 	var bonus: int = 0
-	if _player != null and _player.Stats != null:
-		bonus = _player.Stats.BonusDamage
+	if _player != null and _player.stats != null:
+		bonus = _player.stats.BonusDamage
 	return Data.Damage + bonus
 
 
@@ -21,8 +21,8 @@ func get_effective_fire_rate() -> float:
 	if Data == null or Data.Cooldown <= 0.0:
 		return 0.0
 	var mult: float = 1.0
-	if _player != null and _player.Stats != null:
-		mult = _player.Stats.AttackSpeedMult
+	if _player != null and _player.stats != null:
+		mult = _player.stats.AttackSpeedMult
 	return mult / Data.Cooldown
 
 
@@ -63,8 +63,8 @@ func _update_cooldown() -> void:
 	if Data == null:
 		return
 	var mult: float = 1.0
-	if _player != null and _player.Stats != null:
-		mult = _player.Stats.AttackSpeedMult
+	if _player != null and _player.stats != null:
+		mult = _player.stats.AttackSpeedMult
 	_timer.wait_time = maxf(0.05, Data.Cooldown / mult)
 
 
@@ -115,8 +115,8 @@ func _spawn_pellet(dir: Vector2) -> void:
 	bullet.Direction = dir
 	bullet.Speed = Data.BulletSpeed
 	var bonus: int = 0
-	if _player != null and _player.Stats != null:
-		bonus = _player.Stats.BonusDamage
+	if _player != null and _player.stats != null:
+		bonus = _player.stats.BonusDamage
 	bullet.Damage = Data.Damage + bonus
 	bullet.BulletColor = Data.ProjectileColor
 	bullet.Radius = Data.BulletRadius

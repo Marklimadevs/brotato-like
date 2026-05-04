@@ -90,20 +90,20 @@ func _update_visibility() -> void:
 
 func _refresh() -> void:
 	var p: Player = GameManager.Player
-	if p == null or not p.is_alive() or p.Stats == null:
+	if p == null or not p.is_alive() or p.stats == null:
 		return
 
-	_hp_val.text = "%d / %d" % [maxi(0, p.Stats.CurrentHp), p.Stats.MaxHp]
-	_dmg_val.text = "+%d" % p.Stats.BonusDamage
-	_atk_spd_val.text = "%d%%" % int(round(p.Stats.AttackSpeedMult * 100.0))
-	_move_val.text = "%d" % int(p.Stats.MoveSpeed)
-	_pickup_val.text = "%d" % int(p.Stats.PickupRadius)
-	_xp_val.text = "%d%%" % int(round(p.Stats.XpGainMult * 100.0))
-	_crit_val.text = "%d%%" % int(round(p.Stats.CritChance * 100.0))
-	_crit_dmg_val.text = "×%.2f" % p.Stats.CritMultiplier
-	_armor_val.text = "%d" % p.Stats.Armor
-	_regen_val.text = "%.1f/s" % p.Stats.HpRegenPerSec
-	_knock_val.text = "%d" % int(p.Stats.Knockback)
+	_hp_val.text = "%d / %d" % [maxi(0, p.stats.CurrentHp), p.stats.MaxHp]
+	_dmg_val.text = "+%d" % p.stats.BonusDamage
+	_atk_spd_val.text = "%d%%" % int(round(p.stats.AttackSpeedMult * 100.0))
+	_move_val.text = "%d" % int(p.stats.MoveSpeed)
+	_pickup_val.text = "%d" % int(p.stats.PickupRadius)
+	_xp_val.text = "%d%%" % int(round(p.stats.XpGainMult * 100.0))
+	_crit_val.text = "%d%%" % int(round(p.stats.CritChance * 100.0))
+	_crit_dmg_val.text = "×%.2f" % p.stats.CritMultiplier
+	_armor_val.text = "%d" % p.stats.Armor
+	_regen_val.text = "%.1f/s" % p.stats.HpRegenPerSec
+	_knock_val.text = "%d" % int(p.stats.Knockback)
 
 	var idx: int = 0
 	for w in p.get_active_weapons():
