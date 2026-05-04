@@ -32,6 +32,8 @@ func _on_died() -> void:
 	_subtitle.text = "Você caiu na wave %d de %d" % [wave, total_waves]
 	_root.visible = true
 	get_tree().paused = true
+	AdsManager.notify_gameplay_stop()
+	AdsManager.track_event("run_died", {"wave": wave, "level": GameManager.Level, "difficulty": GameManager.SelectedDifficulty})
 
 	# Configure revive button — só aparece se ainda não foi usada nesta run
 	if _revive_btn != null:
@@ -60,6 +62,7 @@ func _on_revive_pressed() -> void:
 
 func _on_revive_success() -> void:
 	GameManager.ReviveUsedThisRun = true
+	AdsManager.track_event("revive_used", {})
 	var player = GameManager.Player
 	if player != null and is_instance_valid(player):
 		var revive_hp: int = 15
@@ -69,6 +72,7 @@ func _on_revive_success() -> void:
 	GameManager.clear_all_enemies()
 	_root.visible = false
 	get_tree().paused = false
+	AdsManager.notify_gameplay_start()
 
 
 func _on_revive_fail() -> void:

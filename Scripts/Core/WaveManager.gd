@@ -104,8 +104,11 @@ func _start_wave(idx: int) -> void:
 	_spawn_timer = 0.5
 	_boss_spawned = false
 	CurrentBoss = null
+	GameManager.WaveMaterialsEarned = 0
 	wave_started.emit()
 	print("Wave %d iniciada" % (idx + 1))
+	AdsManager.notify_gameplay_start()
+	AdsManager.track_event("wave_started", {"wave": idx + 1, "difficulty": GameManager.SelectedDifficulty})
 
 
 func _end_current_wave() -> void:
@@ -114,6 +117,8 @@ func _end_current_wave() -> void:
 	_clear_enemies()
 	wave_ended.emit()
 	print("Wave %d terminada" % (CurrentWaveIndex + 1))
+	AdsManager.notify_gameplay_stop()
+	AdsManager.track_event("wave_completed", {"wave": CurrentWaveIndex + 1, "level": GameManager.Level, "materials": GameManager.Materials})
 
 	if GameManager.Player != null and not GameManager.Player.is_alive():
 		return
@@ -135,6 +140,7 @@ func _on_after_level_up_between_waves() -> void:
 		GameWon = true
 		game_won_event.emit()
 		print("VITÓRIA! Todas as 5 waves completas.")
+		AdsManager.track_event("run_won", {"difficulty": GameManager.SelectedDifficulty, "level": GameManager.Level})
 		return
 
 	GameManager.shop_closed.connect(_on_shop_closed_between_waves)
@@ -168,6 +174,7 @@ func notify_boss_killed() -> void:
 	if BetweenWaves or GameWon:
 		return
 	CurrentBoss = null
+	AdsManager.track_event("boss_killed", {"wave": CurrentWaveIndex + 1, "level": GameManager.Level})
 	if is_boss_wave():
 		print("Boss derrotado — terminando wave 5")
 		_end_current_wave()

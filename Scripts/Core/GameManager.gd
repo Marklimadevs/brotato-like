@@ -22,6 +22,7 @@ var XpForNextLevel: int = 5
 var Materials: int = 0
 var PendingLevelUps: int = 0
 var ReviveUsedThisRun: bool = false
+var WaveMaterialsEarned: int = 0  # reseta a cada wave_start; usado pra bonus mat ad
 
 
 func _enter_tree() -> void:
@@ -81,6 +82,7 @@ func add_material(amount: int) -> void:
 	if amount <= 0:
 		return
 	Materials += amount
+	WaveMaterialsEarned += amount
 	materials_changed.emit()
 
 
@@ -109,6 +111,7 @@ func reset_run_state() -> void:
 	Materials = 0
 	PendingLevelUps = 0
 	ReviveUsedThisRun = false
+	WaveMaterialsEarned = 0
 	Enemies.clear()
 	Player = null
 

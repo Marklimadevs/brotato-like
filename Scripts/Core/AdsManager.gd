@@ -107,6 +107,24 @@ func notify_loading_stop() -> void:
 	JavaScriptBridge.eval("try { window.CrazyGames.SDK.game.loadingStop(); } catch(e) {}", true)
 
 
+# Analytics — chama window.CrazyGames.SDK.analytics.trackEvent.
+# Em editor / sem SDK, loga no console pra debug.
+func track_event(event_name: String, properties: Dictionary = {}) -> void:
+	var props_str: String = JSON.stringify(properties)
+	if not _sdk_available:
+		print("Analytics: %s %s" % [event_name, props_str])
+		return
+	var name_str: String = JSON.stringify(event_name)
+	var code: String = """
+		try {
+			if (window.CrazyGames && window.CrazyGames.SDK && window.CrazyGames.SDK.analytics) {
+				window.CrazyGames.SDK.analytics.trackEvent(%s, %s);
+			}
+		} catch(e) { console.warn('analytics track failed:', e); }
+	""" % [name_str, props_str]
+	JavaScriptBridge.eval(code, true)
+
+
 func _on_ad_success_internal(_args = []) -> void:
 	_ad_in_progress = false
 	var cb: Callable = _on_success

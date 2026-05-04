@@ -30,6 +30,7 @@ func _on_game_won() -> void:
 	SaveData.notify_difficulty_completed(GameManager.SelectedDifficulty)
 	_root.visible = true
 	get_tree().paused = true
+	AdsManager.notify_gameplay_stop()
 
 
 func _on_restart() -> void:

@@ -184,6 +184,7 @@ func _on_choose(preset: CharacterPreset) -> void:
 	GameManager.reset_run_state()
 	GameManager.SelectedCharacter = preset
 	GameManager.SelectedDifficulty = _selected_difficulty
+	AdsManager.track_event("run_start", {"character": preset.name, "difficulty": _selected_difficulty})
 	get_tree().change_scene_to_file("res://Scenes/Main.tscn")
 
 

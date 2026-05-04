@@ -16,6 +16,7 @@ var _offer_rich_labels: Array[RichTextLabel] = []
 var _lock_buttons: Array[Button] = []
 var _reroll_button: Button
 var _free_reroll_button: Button
+var _bonus_mat_button: Button
 var _continue_button: Button
 var _sell_list: VBoxContainer
 var _sell_header: Label
@@ -25,6 +26,7 @@ var _current_offers: Array = []  # Array of Dictionary { item, weapon } or null
 var _purchased: Array[bool] = []
 var _locked: Array[bool] = []
 var _free_reroll_used: bool = false
+var _bonus_mat_used: bool = false
 
 
 func _ready() -> void:
@@ -54,6 +56,7 @@ func _exit_tree() -> void:
 
 func _on_shop_opened() -> void:
 	_free_reroll_used = false
+	_bonus_mat_used = false
 	_roll_offers()
 	_root.visible = true
 	get_tree().paused = true
@@ -111,6 +114,7 @@ func _on_free_reroll_pressed() -> void:
 func _on_free_reroll_success() -> void:
 	_free_reroll_used = true
 	_roll_offers()
+	AdsManager.track_event("free_reroll_used", {})
 	_update_ui()
 
 
@@ -119,6 +123,30 @@ func _on_free_reroll_fail() -> void:
 		return
 	_free_reroll_button.disabled = false
 	_free_reroll_button.text = "▶  Reroll grátis (anúncio)"
+
+
+func _on_bonus_mat_pressed() -> void:
+	if _bonus_mat_used or _bonus_mat_button == null:
+		return
+	_bonus_mat_button.disabled = true
+	_bonus_mat_button.text = "Carregando anúncio..."
+	AdsManager.request_rewarded_ad(_on_bonus_mat_success, _on_bonus_mat_fail)
+
+
+func _on_bonus_mat_success() -> void:
+	_bonus_mat_used = true
+	var earned: int = GameManager.WaveMaterialsEarned
+	var bonus: int = maxi(1, int(earned * 0.5))
+	GameManager.add_material(bonus)
+	AdsManager.track_event("bonus_mat_used", {"amount": bonus, "wave": (WaveManager.Instance.CurrentWaveIndex + 1) if WaveManager.Instance != null else 0})
+	_update_ui()
+
+
+func _on_bonus_mat_fail() -> void:
+	if _bonus_mat_button == null or not is_instance_valid(_bonus_mat_button):
+		return
+	_bonus_mat_button.disabled = false
+	_update_ui()
 
 
 func _on_lock_toggle(idx: int, pressed: bool) -> void:
@@ -240,6 +268,14 @@ func _update_ui() -> void:
 		if not _free_reroll_used:
 			_free_reroll_button.disabled = false
 			_free_reroll_button.text = "▶  Reroll grátis (anúncio)"
+
+	if _bonus_mat_button != null:
+		var earned: int = GameManager.WaveMaterialsEarned
+		var bonus: int = int(earned * 0.5)
+		_bonus_mat_button.visible = (bonus > 0) and not _bonus_mat_used
+		if not _bonus_mat_used:
+			_bonus_mat_button.disabled = false
+			_bonus_mat_button.text = "▶  +%d materiais (anúncio)" % bonus
 
 	# Sell list
 	for c in _sell_list.get_children():
@@ -388,6 +424,16 @@ func _build_ui() -> void:
 	_free_reroll_button.add_theme_color_override("font_hover_color", Color(1, 0.95, 0.55))
 	_free_reroll_button.pressed.connect(_on_free_reroll_pressed)
 	left_col.add_child(_free_reroll_button)
+
+	# Bonus materials via rewarded ad — destaque dourado
+	_bonus_mat_button = Button.new()
+	_bonus_mat_button.text = "▶  +50% materiais (anúncio)"
+	_bonus_mat_button.custom_minimum_size = Vector2(380, 36)
+	_bonus_mat_button.add_theme_font_size_override("font_size", 13)
+	_bonus_mat_button.add_theme_color_override("font_color", Color(1, 0.85, 0.4))
+	_bonus_mat_button.add_theme_color_override("font_hover_color", Color(1, 0.95, 0.55))
+	_bonus_mat_button.pressed.connect(_on_bonus_mat_pressed)
+	left_col.add_child(_bonus_mat_button)
 
 	# RIGHT — sell
 	var right_col := VBoxContainer.new()
