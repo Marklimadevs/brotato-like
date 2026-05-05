@@ -1,6 +1,8 @@
 extends CanvasLayer
 
 var _root: Control
+var _share_btn: Button
+var _share_status: Label
 
 
 func _ready() -> void:
@@ -31,6 +33,7 @@ func _on_game_won() -> void:
 	_root.visible = true
 	get_tree().paused = true
 	AdsManager.notify_gameplay_stop()
+	AdsManager.notify_happytime()  # vencer a run = pico de momento positivo
 
 
 func _on_restart() -> void:
@@ -43,6 +46,43 @@ func _on_menu() -> void:
 	get_tree().paused = false
 	GameManager.reset_run_state()
 	get_tree().change_scene_to_file("res://Scenes/CharacterSelect.tscn")
+
+
+func _on_share_pressed() -> void:
+	if _share_btn == null: return
+	_share_btn.disabled = true
+	_share_btn.text = "Gerando link..."
+	var char_name: String = ""
+	if GameManager.SelectedCharacter != null:
+		char_name = GameManager.SelectedCharacter.name
+	var params: Dictionary = {
+		"character": char_name,
+		"difficulty": DifficultyConfig.get_label(GameManager.SelectedDifficulty),
+	}
+	AdsManager.get_invite_link(params, _on_invite_link_received)
+
+
+func _on_invite_link_received(url: String) -> void:
+	if _share_btn == null: return
+	_share_btn.disabled = false
+	if url.is_empty():
+		_share_btn.text = "Compartilhar"
+		_share_status.text = "Não foi possível gerar o link."
+		return
+
+	# Copia para clipboard via JS API (funciona dentro do iframe do CrazyGames)
+	if OS.has_feature("web") and Engine.has_singleton("JavaScriptBridge"):
+		var safe_url: String = JSON.stringify(url)
+		JavaScriptBridge.eval("""
+			try {
+				navigator.clipboard.writeText(%s);
+			} catch(e) { console.warn('clipboard failed:', e); }
+		""" % safe_url, true)
+	else:
+		print("Invite link: ", url)
+
+	_share_btn.text = "✓ Link copiado!"
+	_share_status.text = url
 
 
 func _build_ui() -> void:
@@ -64,10 +104,10 @@ func _build_ui() -> void:
 	panel.anchor_top = 0.5
 	panel.anchor_right = 0.5
 	panel.anchor_bottom = 0.5
-	panel.offset_left = -240
-	panel.offset_top = -150
-	panel.offset_right = 240
-	panel.offset_bottom = 150
+	panel.offset_left = -260
+	panel.offset_top = -200
+	panel.offset_right = 260
+	panel.offset_bottom = 200
 	_root.add_child(panel)
 
 	var margin := MarginContainer.new()
@@ -78,7 +118,7 @@ func _build_ui() -> void:
 	panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
+	vbox.add_theme_constant_override("separation", 12)
 	margin.add_child(vbox)
 
 	var title := Label.new()
@@ -94,9 +134,27 @@ func _build_ui() -> void:
 	subtitle.add_theme_font_size_override("font_size", 16)
 	vbox.add_child(subtitle)
 
+	# Share button (CrazyGames inviteLink)
+	_share_btn = Button.new()
+	_share_btn.text = "Compartilhar"
+	_share_btn.custom_minimum_size = Vector2(380, 42)
+	_share_btn.add_theme_font_size_override("font_size", 14)
+	_share_btn.add_theme_color_override("font_color", Color(0.6, 0.85, 1))
+	_share_btn.add_theme_color_override("font_hover_color", Color(0.7, 0.95, 1))
+	_share_btn.pressed.connect(_on_share_pressed)
+	vbox.add_child(_share_btn)
+
+	_share_status = Label.new()
+	_share_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_share_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_share_status.add_theme_font_size_override("font_size", 11)
+	_share_status.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
+	_share_status.custom_minimum_size = Vector2(380, 30)
+	vbox.add_child(_share_status)
+
 	var btn := Button.new()
 	btn.text = "Jogar de novo (R)"
-	btn.custom_minimum_size = Vector2(380, 52)
+	btn.custom_minimum_size = Vector2(380, 48)
 	btn.add_theme_font_size_override("font_size", 18)
 	btn.pressed.connect(_on_restart)
 	vbox.add_child(btn)

@@ -118,6 +118,7 @@ func _end_current_wave() -> void:
 	wave_ended.emit()
 	print("Wave %d terminada" % (CurrentWaveIndex + 1))
 	AdsManager.notify_gameplay_stop()
+	AdsManager.notify_happytime()  # wave completa = momento positivo
 	AdsManager.track_event("wave_completed", {"wave": CurrentWaveIndex + 1, "level": GameManager.Level, "materials": GameManager.Materials})
 
 	if GameManager.Player != null and not GameManager.Player.is_alive():
@@ -175,6 +176,7 @@ func notify_boss_killed() -> void:
 		return
 	CurrentBoss = null
 	AdsManager.track_event("boss_killed", {"wave": CurrentWaveIndex + 1, "level": GameManager.Level})
+	AdsManager.notify_happytime()  # boss morto = pico de momento positivo
 	if is_boss_wave():
 		print("Boss derrotado — terminando wave 5")
 		_end_current_wave()

@@ -21,12 +21,14 @@ var _sdk_available: bool = false
 var _ad_in_progress: bool = false
 var _on_success: Callable = Callable()
 var _on_fail: Callable = Callable()
+var _on_invite_link_result: Callable = Callable()
 
 # JavaScriptObject refs precisam ficar vivas para o JS chamar de volta
 var _success_cb = null
 var _fail_cb = null
 var _sdk_ready_cb = null
 var _sdk_failed_cb = null
+var _invite_link_cb = null
 
 
 func _ready() -> void:
@@ -90,17 +92,23 @@ func _setup_callbacks() -> void:
 	_fail_cb = JavaScriptBridge.create_callback(_on_ad_fail_internal)
 	_sdk_ready_cb = JavaScriptBridge.create_callback(_on_sdk_ready_internal)
 	_sdk_failed_cb = JavaScriptBridge.create_callback(_on_sdk_failed_internal)
+	_invite_link_cb = JavaScriptBridge.create_callback(_on_invite_link_internal)
 	var window = JavaScriptBridge.get_interface("window")
 	if window != null:
 		window.godotAdSuccess = _success_cb
 		window.godotAdFail = _fail_cb
 		window.godotSdkReady = _sdk_ready_cb
 		window.godotSdkFailed = _sdk_failed_cb
+		window.godotInviteLink = _invite_link_cb
 
 
 func _on_sdk_ready_internal(_args = []) -> void:
 	_sdk_available = true
 	print("AdsManager: ✓ SDK pronto, ads habilitados")
+	# Loading bracket — registra início/fim do load p/ validator detectar
+	notify_loading_start()
+	await get_tree().create_timer(0.4).timeout
+	notify_loading_stop()
 
 
 func _on_sdk_failed_internal(_args = []) -> void:
@@ -180,6 +188,40 @@ func notify_loading_start() -> void:
 func notify_loading_stop() -> void:
 	if not _sdk_available: return
 	JavaScriptBridge.eval("try { window.CrazyGames.SDK.game.loadingStop(); } catch(e) {}", true)
+
+
+# Happytime — sinal pro SDK de "momento positivo" (nivel completo, boss morto).
+# A SDK pode usar pra mostrar midgame ad próprio sem quebrar fluxo.
+func notify_happytime() -> void:
+	if not _sdk_available: return
+	JavaScriptBridge.eval("try { window.CrazyGames.SDK.game.happytime(); } catch(e) {}", true)
+
+
+# Invite link — pede ao SDK uma URL compartilhável com state custom.
+# Resposta é assíncrona via callback (recebe a URL como string, ou "" em erro).
+func get_invite_link(params: Dictionary, on_result: Callable) -> void:
+	if not _sdk_available:
+		on_result.call("")
+		return
+	_on_invite_link_result = on_result
+	var params_str: String = JSON.stringify(params)
+	JavaScriptBridge.eval("""
+		try {
+			window.CrazyGames.SDK.game.inviteLink(%s)
+				.then(function(url) { window.godotInviteLink(String(url || '')); })
+				.catch(function() { window.godotInviteLink(''); });
+		} catch(e) { window.godotInviteLink(''); }
+	""" % params_str, true)
+
+
+func _on_invite_link_internal(args = []) -> void:
+	var url: String = ""
+	if args != null and args.size() > 0:
+		url = str(args[0])
+	var cb: Callable = _on_invite_link_result
+	_on_invite_link_result = Callable()
+	if cb.is_valid():
+		cb.call(url)
 
 
 # Analytics — chama window.CrazyGames.SDK.analytics.trackEvent.
