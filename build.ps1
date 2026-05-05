@@ -7,8 +7,7 @@
 #   .\build.ps1          # sem bump, rebuilda na versão atual
 #
 # Output:
-#   Builds/Web/CrazyGames-vX.Y.Z/index.html (+ js, wasm, pck)
-#   Builds/brotato-vX.Y.Z.zip — pronto pra arrastar pro CrazyGames developer portal
+#   Builds/Web/CrazyGames-vX.Y.Z/  (index.html, .js, .wasm, .pck — pasta pronta pra upload)
 #
 # Pré-requisitos:
 #   - Godot 4.6.2 em $GODOT_PATH abaixo (ou adiciona no PATH e ajusta)
@@ -58,7 +57,6 @@ if ($bumpType -in @("patch","minor","major")) {
 # ===== PREPARE OUTPUT DIR =====
 $exportDir = Join-Path $BUILDS_DIR "Web\CrazyGames-v$newVersion"
 $exportFile = Join-Path $exportDir "index.html"
-$zipFile = Join-Path $BUILDS_DIR "brotato-v$newVersion.zip"
 
 if (Test-Path $exportDir) {
     Write-Host "Limpando export anterior em $exportDir" -ForegroundColor DarkGray
@@ -105,22 +103,15 @@ if ($missing.Count -gt 0) {
 $wasmSize = [math]::Round((Get-Item (Join-Path $exportDir "index.wasm")).Length / 1MB, 1)
 Write-Host "Export OK ($wasmSize MB de WASM)" -ForegroundColor Green
 
-# ===== ZIP PRO UPLOAD =====
-if (Test-Path $zipFile) { Remove-Item $zipFile -Force }
-Write-Host ""
-Write-Host "Gerando ZIP em $zipFile ..." -ForegroundColor Cyan
-Compress-Archive -Path "$exportDir\*" -DestinationPath $zipFile -Force
-$zipSize = [math]::Round((Get-Item $zipFile).Length / 1MB, 1)
-Write-Host "ZIP OK ($zipSize MB)" -ForegroundColor Green
-
 # ===== DONE =====
+$totalSize = [math]::Round((Get-ChildItem $exportDir -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB, 1)
 Write-Host ""
 Write-Host "==================================================" -ForegroundColor Green
 Write-Host "  Build v$newVersion pronto" -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "  ZIP: $zipFile" -ForegroundColor White
-Write-Host "  Pasta: $exportDir" -ForegroundColor DarkGray
+Write-Host "  Pasta: $exportDir" -ForegroundColor White
+Write-Host "  Tamanho total: $totalSize MB" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "  Próximo passo: arrasta o ZIP em https://developer.crazygames.com" -ForegroundColor Yellow
+Write-Host "  Próximo passo: arrasta a pasta inteira em https://developer.crazygames.com" -ForegroundColor Yellow
 Write-Host ""
