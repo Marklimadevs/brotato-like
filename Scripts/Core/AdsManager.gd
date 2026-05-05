@@ -22,10 +22,12 @@ var _ad_in_progress: bool = false
 var _on_success: Callable = Callable()
 var _on_fail: Callable = Callable()
 var _on_invite_link_result: Callable = Callable()
+var _master_bus_idx: int = 0  # cache pra mute/unmute durante ads
 
 # JavaScriptObject refs precisam ficar vivas para o JS chamar de volta
 var _success_cb = null
 var _fail_cb = null
+var _started_cb = null
 var _sdk_ready_cb = null
 var _sdk_failed_cb = null
 var _invite_link_cb = null
@@ -90,6 +92,7 @@ func _ready() -> void:
 func _setup_callbacks() -> void:
 	_success_cb = JavaScriptBridge.create_callback(_on_ad_success_internal)
 	_fail_cb = JavaScriptBridge.create_callback(_on_ad_fail_internal)
+	_started_cb = JavaScriptBridge.create_callback(_on_ad_started_internal)
 	_sdk_ready_cb = JavaScriptBridge.create_callback(_on_sdk_ready_internal)
 	_sdk_failed_cb = JavaScriptBridge.create_callback(_on_sdk_failed_internal)
 	_invite_link_cb = JavaScriptBridge.create_callback(_on_invite_link_internal)
@@ -97,6 +100,7 @@ func _setup_callbacks() -> void:
 	if window != null:
 		window.godotAdSuccess = _success_cb
 		window.godotAdFail = _fail_cb
+		window.godotAdStarted = _started_cb
 		window.godotSdkReady = _sdk_ready_cb
 		window.godotSdkFailed = _sdk_failed_cb
 		window.godotInviteLink = _invite_link_cb
@@ -149,24 +153,43 @@ func request_rewarded_ad(on_success: Callable, on_fail: Callable) -> void:
 			_on_ad_success_internal([])
 			return
 
-	# Produção — chama o SDK do CrazyGames
+	# Produção — chama o SDK do CrazyGames usando o pattern de callbacks
+	# (NÃO é Promise — a API espera um objeto { adStarted, adFinished, adError }
+	# como segundo argumento de requestAd).
 	print("AdsManager: requestAd('rewarded')...")
 	JavaScriptBridge.eval("""
 		try {
-			window.CrazyGames.SDK.ad.requestAd('rewarded')
-				.then(function() {
-					console.log('[AdsManager] ad concluído');
-					window.godotAdSuccess();
-				})
-				.catch(function(err) {
-					console.warn('[AdsManager] ad falhou/pulado:', err);
-					window.godotAdFail();
-				});
+			var callbacks = {
+				adStarted: function() {
+					console.log('[AdsManager] ad started');
+					if (window.godotAdStarted) window.godotAdStarted();
+				},
+				adFinished: function() {
+					console.log('[AdsManager] ad finished — reward');
+					if (window.godotAdSuccess) window.godotAdSuccess();
+				},
+				adError: function(err) {
+					console.warn('[AdsManager] ad error (sem reward):', err);
+					if (window.godotAdFail) window.godotAdFail();
+				}
+			};
+			window.CrazyGames.SDK.ad.requestAd('rewarded', callbacks);
 		} catch(e) {
 			console.error('[AdsManager] erro requestAd:', e);
-			window.godotAdFail();
+			if (window.godotAdFail) window.godotAdFail();
 		}
 	""", true)
+
+
+# Chamado quando o ad realmente começa a tocar — muta áudio e mantém pause.
+func _on_ad_started_internal(_args = []) -> void:
+	print("AdsManager: ad started — mutando áudio")
+	AudioServer.set_bus_mute(_master_bus_idx, true)
+
+
+# Restaura áudio e pause em qualquer terminação (success ou fail).
+func _restore_audio_after_ad() -> void:
+	AudioServer.set_bus_mute(_master_bus_idx, false)
 
 
 # Notificações de gameplay state pro CrazyGames decidir quando mostrar ads.
@@ -244,6 +267,7 @@ func track_event(event_name: String, properties: Dictionary = {}) -> void:
 
 func _on_ad_success_internal(_args = []) -> void:
 	_ad_in_progress = false
+	_restore_audio_after_ad()
 	var cb: Callable = _on_success
 	_on_success = Callable()
 	_on_fail = Callable()
@@ -253,6 +277,7 @@ func _on_ad_success_internal(_args = []) -> void:
 
 func _on_ad_fail_internal(_args = []) -> void:
 	_ad_in_progress = false
+	_restore_audio_after_ad()
 	var cb: Callable = _on_fail
 	_on_success = Callable()
 	_on_fail = Callable()
