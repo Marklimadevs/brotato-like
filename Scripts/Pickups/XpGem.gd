@@ -61,4 +61,5 @@ func _on_body_entered(body: Node2D) -> void:
 		GameManager.add_xp(Value)
 		if MaterialValue > 0:
 			GameManager.add_material(MaterialValue)
+		AudioManager.play_sfx("pickup", 0.15)
 		queue_free()

@@ -34,6 +34,7 @@ func _on_game_won() -> void:
 	get_tree().paused = true
 	AdsManager.notify_gameplay_stop()
 	AdsManager.notify_happytime()  # vencer a run = pico de momento positivo
+	AudioManager.play_music("victory")
 
 
 func _on_restart() -> void:

@@ -110,6 +110,16 @@ func _start_wave(idx: int) -> void:
 	AdsManager.notify_gameplay_start()
 	AdsManager.track_event("wave_started", {"wave": idx + 1, "difficulty": GameManager.SelectedDifficulty})
 
+	# Música escala com a tensão das waves
+	AudioManager.play_sfx("wave_start")
+	if idx == _waves.size() - 1:
+		# Wave 5 — boss vem aos 5s, mas começa com tensão
+		AudioManager.play_music("gameplay_intense")
+	elif idx >= 2:
+		AudioManager.play_music("gameplay_intense")
+	else:
+		AudioManager.play_music("gameplay_normal")
+
 
 func _end_current_wave() -> void:
 	BetweenWaves = true
@@ -120,6 +130,7 @@ func _end_current_wave() -> void:
 	AdsManager.notify_gameplay_stop()
 	AdsManager.notify_happytime()  # wave completa = momento positivo
 	AdsManager.track_event("wave_completed", {"wave": CurrentWaveIndex + 1, "level": GameManager.Level, "materials": GameManager.Materials})
+	AudioManager.play_sfx("wave_complete")
 
 	if GameManager.Player != null and not GameManager.Player.is_alive():
 		return
@@ -169,6 +180,8 @@ func _spawn_boss() -> void:
 	CurrentBoss = enemy
 	print("BOSS apareceu!")
 	boss_spawned.emit()
+	AudioManager.play_sfx("boss_spawn")
+	AudioManager.play_music("boss_theme")
 
 
 func notify_boss_killed() -> void:

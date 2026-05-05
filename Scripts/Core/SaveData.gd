@@ -4,6 +4,9 @@ extends RefCounted
 const SAVE_PATH := "user://save.json"
 
 static var HighestUnlockedDifficulty: int = 1
+static var MasterVolume: float = 1.0
+static var MusicVolume: float = 0.7
+static var SfxVolume: float = 0.9
 
 
 static func load_data() -> void:
@@ -25,6 +28,9 @@ static func load_data() -> void:
 static func save_data() -> void:
 	var dict: Dictionary = {
 		"highestDifficulty": HighestUnlockedDifficulty,
+		"masterVolume": MasterVolume,
+		"musicVolume": MusicVolume,
+		"sfxVolume": SfxVolume,
 	}
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:

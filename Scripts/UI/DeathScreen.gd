@@ -34,6 +34,7 @@ func _on_died() -> void:
 	get_tree().paused = true
 	AdsManager.notify_gameplay_stop()
 	AdsManager.track_event("run_died", {"wave": wave, "level": GameManager.Level, "difficulty": GameManager.SelectedDifficulty})
+	AudioManager.play_music("game_over")
 
 	# Configure revive button — só aparece se ainda não foi usada nesta run
 	if _revive_btn != null:

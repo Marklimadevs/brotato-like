@@ -172,6 +172,12 @@ func take_damage(dmg: int, is_crit: bool = false) -> void:
 	var pos_y: float = -(Data.Radius if Data != null else 12.0) - 2.0
 	DamageNumber.spawn(get_tree().current_scene, global_position + Vector2(0, pos_y), dmg, color, is_crit)
 
+	if is_boss():
+		AudioManager.play_sfx("boss_hit", 0.05)
+	elif is_crit:
+		AudioManager.play_sfx("enemy_hit_crit", 0.1)
+	# (sfx normal de hit já vem do bullet — evita stack)
+
 	if _hp <= 0:
 		_die()
 
@@ -189,6 +195,11 @@ func _die() -> void:
 	_spawn_xp_gem()
 	if Data != null and Data.SplitsOnDeath and Data.SplitInto != null and Data.SplitCount > 0:
 		_spawn_splits()
+		AudioManager.play_sfx("enemy_split", 0.1)
+	elif is_boss():
+		AudioManager.play_sfx("boss_die")
+	else:
+		AudioManager.play_sfx("enemy_death", 0.15)
 	if is_boss() and WaveManager.Instance != null:
 		WaveManager.Instance.notify_boss_killed()
 	queue_free()

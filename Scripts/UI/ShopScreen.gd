@@ -61,9 +61,11 @@ func _on_shop_opened() -> void:
 	_root.visible = true
 	get_tree().paused = true
 	_update_ui()
+	AudioManager.play_sfx("shop_open")
 
 
 func _on_continue() -> void:
+	AudioManager.play_sfx("ui_click", 0.05)
 	_root.visible = false
 	get_tree().paused = false
 	GameManager.notify_shop_closed()
@@ -93,12 +95,14 @@ func _on_buy(idx: int) -> void:
 			return
 		offer["item"].apply(player.stats)
 	_purchased[idx] = true
+	AudioManager.play_sfx("shop_buy")
 	_update_ui()
 
 
 func _on_reroll() -> void:
 	if not GameManager.spend_material(REROLL_COST):
 		return
+	AudioManager.play_sfx("shop_reroll")
 	_roll_offers()
 	_update_ui()
 
@@ -153,6 +157,7 @@ func _on_lock_toggle(idx: int, pressed: bool) -> void:
 	if idx < 0 or idx >= OFFER_SLOTS:
 		return
 	_locked[idx] = pressed
+	AudioManager.play_sfx("shop_lock", 0.05)
 	_update_ui()
 
 
@@ -163,6 +168,7 @@ func _on_sell_weapon(weapon_index: int, sell_value: int) -> void:
 	if not player.remove_weapon_at(weapon_index):
 		return
 	GameManager.add_material(sell_value)
+	AudioManager.play_sfx("shop_sell")
 	_update_ui()
 
 

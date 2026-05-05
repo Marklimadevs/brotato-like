@@ -123,6 +123,7 @@ func _show_one() -> void:
 	_refresh_materials_and_reroll()
 	_root.visible = true
 	get_tree().paused = true
+	AudioManager.play_sfx("level_up")
 
 
 func _roll_choices() -> void:
@@ -155,11 +156,13 @@ func _refresh_materials_and_reroll() -> void:
 func _on_reroll() -> void:
 	if not GameManager.spend_material(REROLL_COST):
 		return
+	AudioManager.play_sfx("shop_reroll")
 	_roll_choices()
 	_refresh_materials_and_reroll()
 
 
 func _on_button_pressed(idx: int) -> void:
+	AudioManager.play_sfx("ui_click", 0.05)
 	if idx < _current_choices.size() and GameManager.Player != null and GameManager.Player.stats != null:
 		_current_choices[idx].apply(GameManager.Player.stats)
 

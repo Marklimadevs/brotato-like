@@ -18,6 +18,7 @@ func _ready() -> void:
 		_selected_difficulty = SaveData.HighestUnlockedDifficulty
 	_build_ui()
 	_update_difficulty_buttons()
+	AudioManager.play_music("main_menu")
 
 
 func _build_ui() -> void:

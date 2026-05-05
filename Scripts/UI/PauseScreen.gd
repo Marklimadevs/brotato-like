@@ -102,3 +102,48 @@ func _build_ui() -> void:
 	menu_btn.add_theme_font_size_override("font_size", 14)
 	menu_btn.pressed.connect(_on_menu)
 	vbox.add_child(menu_btn)
+
+	# Separator + título de áudio
+	vbox.add_child(HSeparator.new())
+	var audio_title := Label.new()
+	audio_title.text = "ÁUDIO"
+	audio_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	audio_title.add_theme_font_size_override("font_size", 14)
+	audio_title.add_theme_color_override("font_color", Color(0.7, 0.85, 1))
+	vbox.add_child(audio_title)
+
+	_add_volume_slider(vbox, "Master", AudioManager.master_volume, AudioManager.set_master_volume)
+	_add_volume_slider(vbox, "Música", AudioManager.music_volume, AudioManager.set_music_volume)
+	_add_volume_slider(vbox, "Efeitos", AudioManager.sfx_volume, AudioManager.set_sfx_volume)
+
+
+func _add_volume_slider(parent: VBoxContainer, label_text: String, initial_value: float, on_change: Callable) -> void:
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 10)
+	parent.add_child(hbox)
+
+	var label := Label.new()
+	label.text = label_text
+	label.custom_minimum_size = Vector2(80, 0)
+	label.add_theme_font_size_override("font_size", 13)
+	hbox.add_child(label)
+
+	var slider := HSlider.new()
+	slider.min_value = 0.0
+	slider.max_value = 1.0
+	slider.step = 0.01
+	slider.value = initial_value
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.custom_minimum_size = Vector2(180, 24)
+	hbox.add_child(slider)
+
+	var value_label := Label.new()
+	value_label.text = "%d%%" % int(initial_value * 100)
+	value_label.custom_minimum_size = Vector2(50, 0)
+	value_label.add_theme_font_size_override("font_size", 12)
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hbox.add_child(value_label)
+
+	slider.value_changed.connect(func(v: float):
+		on_change.call(v)
+		value_label.text = "%d%%" % int(v * 100))

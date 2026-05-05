@@ -153,6 +153,7 @@ func take_damage(dmg: int) -> void:
 	DamageNumber.spawn(get_tree().current_scene, global_position + Vector2(0, -Radius - 4), actual_dmg, Color(1, 0.55, 0.55))
 	if _camera != null:
 		_camera.shake(11.0)
+	AudioManager.play_sfx("player_hurt", 0.05)
 
 	if stats.CurrentHp <= 0:
 		_die()
@@ -181,6 +182,7 @@ func _die() -> void:
 			child.queue_free()
 
 	print("Player died!")
+	AudioManager.play_sfx("player_die")
 	GameManager.notify_player_died()
 
 

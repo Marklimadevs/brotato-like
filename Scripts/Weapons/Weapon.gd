@@ -109,6 +109,10 @@ func _fire_at(target: EnemyBase) -> void:
 			dir = aim_dir.rotated(t * spread)
 		_spawn_pellet(dir)
 
+	# Single shot sound per trigger (não 1× por pellet — ficaria barulhento demais)
+	if Data != null:
+		AudioManager.play_sfx("shoot_" + Data.WeaponName.to_lower(), 0.12)
+
 
 func _spawn_pellet(dir: Vector2) -> void:
 	var bullet: Bullet = Data.BulletScene.instantiate()

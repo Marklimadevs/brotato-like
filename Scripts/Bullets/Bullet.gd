@@ -64,6 +64,8 @@ func _on_body_entered(body: Node2D) -> void:
 		if player != null and player.stats != null and player.stats.Knockback > 0.0:
 			enemy.apply_knockback(Direction * player.stats.Knockback)
 
+		AudioManager.play_sfx("bullet_hit", 0.08)
+
 		_hits_remaining -= 1
 		if _hits_remaining <= 0:
 			_consumed = true
